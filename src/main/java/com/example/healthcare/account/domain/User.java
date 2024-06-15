@@ -1,7 +1,9 @@
 package com.example.healthcare.account.domain;
 
 import com.example.healthcare.account.domain.code.AuthorityType;
+import com.example.healthcare.account.domain.code.UserStatus;
 import com.example.healthcare.common.domain.Base;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,25 +25,21 @@ public class User extends Base {
 
   @Column(name = "login_id", length = 191, unique = true)
   private String loginId;
-
   @Column(name = "email", nullable = false, length = 191, unique = true)
   private String email;
-
   @Column(nullable = false)
   private String nickname;
-
   private String mobile;
-
-  @Column(nullable = false)
   private String name;
-
+  @JsonIgnore
   @Column(nullable = false)
   private String password;
-
+  @Enumerated(value = EnumType.STRING)
+  @Column(name = "user_status", length = 191)
+  private UserStatus userStatus;
   @Enumerated(value = EnumType.STRING)
   @Column(name = "authority_type", length = 191)
   private AuthorityType authorityType;
-
   private LocalDateTime signUpDateTime;
   private LocalDateTime recentSignInDateTime;
   private LocalDateTime recentChangeStatusDateTime;
