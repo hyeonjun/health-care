@@ -1,6 +1,7 @@
 package com.example.healthcare.account.domain;
 
 import com.example.healthcare.account.domain.code.AuthorityType;
+import com.example.healthcare.base.domain.Base;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @DynamicUpdate
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends Base {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
