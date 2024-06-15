@@ -1,4 +1,4 @@
-package com.example.healthcare.exceptionhandler;
+package com.example.healthcare.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
