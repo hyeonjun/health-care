@@ -1,4 +1,7 @@
 package com.example.healthcare.exercise.repository;
 
-public interface ExerciseRepository {
+import com.example.healthcare.exercise.domain.Exercise;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 }

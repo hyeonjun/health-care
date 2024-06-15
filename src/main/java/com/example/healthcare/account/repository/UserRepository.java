@@ -1,4 +1,7 @@
 package com.example.healthcare.account.repository;
 
-public interface UserRepository {
+import com.example.healthcare.account.domain.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
 }
