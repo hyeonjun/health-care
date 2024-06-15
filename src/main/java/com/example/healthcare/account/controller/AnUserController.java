@@ -2,8 +2,8 @@ package com.example.healthcare.account.controller;
 
 import com.example.healthcare.account.service.UserAnService;
 import com.example.healthcare.account.service.dto.SignUpDTO;
+import com.example.healthcare.common.response.CommonResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +18,9 @@ public class AnUserController {
 
   // 회원가입
   @PostMapping("/sign-up")
-  public ResponseEntity<?> signUp(@RequestBody SignUpDTO signUpDTO){
-    return ResponseEntity.ok(userAnService.signUp(signUpDTO));
+  public CommonResponse<Void> signUp(@RequestBody SignUpDTO signUpDTO){
+    userAnService.signUp(signUpDTO);
+    return CommonResponse.success();
   }
 
 }
