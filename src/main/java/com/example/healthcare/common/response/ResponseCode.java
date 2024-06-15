@@ -1,4 +1,4 @@
-package com.example.healthcare.util;
+package com.example.healthcare.common.response;
 
 public interface ResponseCode {
   String getCode();

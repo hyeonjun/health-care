@@ -1,4 +1,4 @@
-package com.example.healthcare.base.domain;
+package com.example.healthcare.common.domain;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;

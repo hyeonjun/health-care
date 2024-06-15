@@ -1,6 +1,6 @@
-package com.example.healthcare.exception;
+package com.example.healthcare.common.exception;
 
-import com.example.healthcare.util.ResponseCode;
+import com.example.healthcare.common.response.ResponseCode;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

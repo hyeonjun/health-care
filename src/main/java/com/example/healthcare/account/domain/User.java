@@ -1,7 +1,7 @@
 package com.example.healthcare.account.domain;
 
 import com.example.healthcare.account.domain.code.AuthorityType;
-import com.example.healthcare.base.domain.Base;
+import com.example.healthcare.common.domain.Base;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

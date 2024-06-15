@@ -1,4 +1,4 @@
-package com.example.healthcare.util;
+package com.example.healthcare.common.response;
 
 public enum CommonResponseCode implements ResponseCode {
   SUCCESS("CMN-001", "success"),

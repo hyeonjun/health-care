@@ -1,6 +1,6 @@
 package com.example.healthcare.exercise.domain;
 
-import com.example.healthcare.base.domain.Base;
+import com.example.healthcare.common.domain.Base;
 import com.example.healthcare.exercise.domain.code.ExerciseBodyType;
 import com.example.healthcare.exercise.domain.code.ExerciseToolType;
 import jakarta.persistence.*;

@@ -1,6 +1,6 @@
-package com.example.healthcare.util;
+package com.example.healthcare.common.response;
 
-import com.example.healthcare.exception.CommonException;
+import com.example.healthcare.common.exception.CommonException;
 import lombok.Getter;
 
 @Getter
