@@ -28,6 +28,7 @@ public class SignUpDTO {
 
 
   @NotBlank
+  @Size(min = 2, max = 15)
   private String newPassword;
   @NotBlank
   private String confirmPassword;
