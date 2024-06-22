@@ -1,7 +1,7 @@
 package com.example.healthcare.exercise.domain;
 
+import com.example.healthcare.account.domain.User;
 import com.example.healthcare.common.domain.Base;
-import com.example.healthcare.exercise.domain.code.ExerciseType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -13,20 +13,21 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExerciseTypeRelation extends Base {
+public class UserExerciseRoutine extends Base {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "exercise_type_relation_id")
+  @Column(name = "user_exercise_routine_id")
   private Long id;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(name = "exercise_type", length = 191)
-  private ExerciseType exerciseType;
+  private Long restTime;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_exercise_log_id", nullable = false, referencedColumnName = "user_exercise_log_id")
+  @JsonBackReference
+  private UserExerciseLog userExerciseLog;
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "exercise_id", nullable = false, referencedColumnName = "exercise_id")
   @JsonBackReference
   private Exercise exercise;
-
 }
