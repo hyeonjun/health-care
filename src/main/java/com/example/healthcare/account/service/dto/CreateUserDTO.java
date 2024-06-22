@@ -9,10 +9,6 @@ import org.hibernate.validator.constraints.Length;
 
 public record CreateUserDTO(
   @NotBlank
-  @Length(min = VerifyUtil.MIN_DEFAULT_LENGTH, max = VerifyUtil.MAX_DEFAULT_LENGTH)
-  @Pattern(regexp = RegexUtil.REGEXP_LOGIN_ID, message = "invalid login id")
-  String loginId,
-  @NotBlank
   @Length(min = VerifyUtil.MIN_DEFAULT_LENGTH, max = VerifyUtil.MAX_EMAIL_LENGTH)
   @Email(regexp = RegexUtil.REGEXP_EMAIL)
   String email,
