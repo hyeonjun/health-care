@@ -26,11 +26,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,18 +109,8 @@ public class JwtUtil {
         res.addCookie(cookie);
     }
 
-    // header 에서 ACCESS TOKEN 가져오기
-    public String getJwtFromHeader(HttpServletRequest request) {
-        String accessToken = request.getHeader(ACCESS_TOKEN);
-        if (StringUtils.hasText(accessToken) && accessToken.startsWith(BEARER_PREFIX)) {
-            return accessToken.substring(7);
-        }
-        return null;
-    }
-
-    public boolean validateToken(HttpServletRequest req, HttpServletResponse res, String token) {
+    public boolean validateToken(String token) {
         try {
-
             Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             if (redisUtil.hasKeyBlackList(token)) {
                 throw new RuntimeException("logout된 아이디입니다.");
@@ -132,16 +120,8 @@ public class JwtUtil {
             log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
             throw new JwtException("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
         } catch (ExpiredJwtException e) {
-            if (req.getHeader(REFRESH_TOKEN).isEmpty()) {
-                log.error("Expired JWT token, 만료된 JWT token 입니다.");
-                throw new JwtException("Expired JWT token, 만료된 JWT token 입니다.");
-            } else {
-                String RefreshToken = req.getHeader(REFRESH_TOKEN);
-                String newAccessToken = regenerateAccessToken(RefreshToken);
-                res.addHeader(JwtUtil.ACCESS_TOKEN, newAccessToken);
-                res.addHeader(JwtUtil.REFRESH_TOKEN, RefreshToken);
-                log.info("토큰재발급 성공: {}", newAccessToken);
-            }
+            log.error("Expired JWT token, 만료된 JWT token 입니다.");
+            throw new JwtException("Expired JWT token, 만료된 JWT token 입니다.");
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
             throw new JwtException("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
@@ -149,7 +129,6 @@ public class JwtUtil {
             log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
             throw new JwtException("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
-        return false;
     }
 
     private String regenerateAccessToken(String refreshToken) {
