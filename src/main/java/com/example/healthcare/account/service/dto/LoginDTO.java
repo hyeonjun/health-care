@@ -7,14 +7,12 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-@Data
-public class LoginDTO {
-  @NotBlank
-  @Length(min = VerifyUtil.MIN_DEFAULT_LENGTH, max = VerifyUtil.MAX_DEFAULT_LENGTH)
-  @Pattern(regexp = RegexUtil.REGEXP_LOGIN_ID, message = "invalid login id")
-  String loginId;
-  @NotBlank
-  @Length(min = 8, max = VerifyUtil.MAX_DEFAULT_LENGTH)
-  @Pattern(regexp = RegexUtil.REGEXP_PASSWORD, message = "invalid password format")
-  String password;
-}
+public record LoginDTO(
+        @NotBlank
+        @Length(min = VerifyUtil.MIN_DEFAULT_LENGTH, max = VerifyUtil.MAX_DEFAULT_LENGTH)
+        @Pattern(regexp = RegexUtil.REGEXP_LOGIN_ID, message = "invalid login id")
+        String email,
+        @NotBlank
+        @Length(min = 8, max = VerifyUtil.MAX_DEFAULT_LENGTH)
+        @Pattern(regexp = RegexUtil.REGEXP_PASSWORD, message = "invalid password format")
+        String password) {}

@@ -33,11 +33,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("request uri: {}", request.getRequestURI());
 
         try {
-            LoginDTO loginDTO = new ObjectMapper().readValue(request.getInputStream(), LoginDTO.class);
-
+            LoginDTO dto = new ObjectMapper().readValue(request.getInputStream(), LoginDTO.class);
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                    loginDTO.getLoginId(),
-                    loginDTO.getPassword()
+                    dto.email(),
+                    dto.password()
             );
             return getAuthenticationManager().authenticate(usernamePasswordAuthenticationToken);
         } catch (IOException e) {
