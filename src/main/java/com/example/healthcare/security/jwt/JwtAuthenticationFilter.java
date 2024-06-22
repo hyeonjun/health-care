@@ -48,14 +48,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
 
-        String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
+        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUserEmail();
         AuthorityType authorityType = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getAuthorityType();
         Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();
 
-        String accessToken = jwtUtil.createAccessToken(username, authorityType);
+        String accessToken = jwtUtil.createAccessToken(email, authorityType);
         response.addHeader(JwtUtil.ACCESS_TOKEN, accessToken);
 
-        String refreshToken = jwtUtil.createRefreshToken(username);
+        String refreshToken = jwtUtil.createRefreshToken(email);
         response.addHeader(JwtUtil.REFRESH_TOKEN, refreshToken);
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
