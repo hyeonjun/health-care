@@ -56,10 +56,8 @@ public class JwtUtil {
 
     @Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
     private String secretKey;
-//    private Key key;
     private SecretKey key;
 
-    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
@@ -68,23 +66,22 @@ public class JwtUtil {
     // 로그 설정
     public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
 
-    @PostConstruct
-    public void init() {
-        byte[] bytes = Base64.getDecoder().decode(secretKey);
-//        key = Keys.hmacShaKeyFor(bytes);
-        key = new SecretKeySpec(bytes, "HmacSHA256");
-    }
+        @PostConstruct
+        public void init() {
+            byte[] bytes = Base64.getDecoder().decode(secretKey);
+            key = Keys.hmacShaKeyFor(bytes);
+        }
 
     public String createAccessToken(String username, AuthorityType authorityType) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(username) // 사용자 식별자값(ID)
-                        .claim(AUTHORIZATION_KEY, authorityType) // 사용자 권한
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
-                        .setIssuedAt(date) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
+                        .subject(username) // 사용자 식별자값(ID)
+                        .claim(AUTHORIZATION_KEY, authorityType)
+                        .expiration(new Date(date.getTime() + TOKEN_TIME))
+                        .issuedAt(date) // 발급일
+                        .signWith(key) // 암호화 알고리즘
                         .compact();
     }
 
@@ -93,10 +90,10 @@ public class JwtUtil {
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(username) // 사용자 식별자값(ID)
-                        .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_TIME)) // 만료 시간
-                        .setIssuedAt(now) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
+                        .subject(username) // 사용자 식별자값(ID)
+                        .expiration(new Date(now.getTime() + REFRESH_TOKEN_TIME)) // 만료 시간
+                        .issuedAt(now) // 발급일
+                        .signWith(key) // 암호화 알고리즘
                         .compact();
     }
 
@@ -160,7 +157,7 @@ public class JwtUtil {
         if (RT == null) {
             throw new RuntimeException("저장되지 않은 RefreshToken 입니다.");
         } else {
-            Optional<com.example.healthcare.account.domain.User> userOptional = userRepository.findByLoginId(RT);
+            Optional<com.example.healthcare.account.domain.User> userOptional = userRepository.findByEmail(RT);
             String email = userOptional.get().getEmail();
             AuthorityType authorityType = userOptional.get().getAuthorityType();
 
@@ -238,11 +235,10 @@ public class JwtUtil {
         return (expiration.getTime() - now);
     }
 
-    public String getUserMail(String token) {
+    public String getUsername(String token) {
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(this.getUserPk(token));
         return userDetails.getUsername();
-        //return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
-    }
+        }
 
     public String getUserPk(String token){
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
