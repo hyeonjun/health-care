@@ -23,6 +23,9 @@ public class Exercise extends Base {
   @Column(name = "name", nullable = false, length = 191)
   private String name;
 
+  @Column(name = "description", length = 3000)
+  private String description;
+
   @Enumerated(value = EnumType.STRING)
   @Column(name = "exercise_body_type", nullable = false, length = 191)
   private ExerciseBodyType bodyType;
