@@ -18,6 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.example.healthcare.security.jwt.JwtUtil.ACCESS_TOKEN;
+import static com.example.healthcare.security.jwt.JwtUtil.BEARER_PREFIX;
+
 @Slf4j(topic = "JWT 검증 및 인가")
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
@@ -27,9 +30,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-        String tokenValue = jwtUtil.getJwtFromHeader(req);
+        String tokenValue = getJwtFromHeader(req);
         if (StringUtils.hasText(tokenValue)) {
-            if (!jwtUtil.validateToken(req, res, tokenValue)) {
+            if (!jwtUtil.validateToken(tokenValue)) {
                 return;
             }
 
@@ -60,4 +63,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
+
+    // header 에서 ACCESS TOKEN 가져오는 메서드
+    private String getJwtFromHeader(HttpServletRequest request) {
+        String accessToken = request.getHeader(ACCESS_TOKEN);
+        if (StringUtils.hasText(accessToken) && accessToken.startsWith(BEARER_PREFIX)) {
+            return accessToken.substring(7);
+        }
+        return null;
+    }
+
 }
