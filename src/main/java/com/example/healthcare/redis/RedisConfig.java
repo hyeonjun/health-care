@@ -36,6 +36,7 @@ public class RedisConfig {
     redisTemplate.setConnectionFactory(redisConnectionFactory());
     redisTemplate.setKeySerializer(new StringRedisSerializer());
     redisTemplate.setValueSerializer(new StringRedisSerializer());
+    redisTemplate.setEnableTransactionSupport(true);  // 트랜잭션 지원 활성화
     return redisTemplate;
   }
 
