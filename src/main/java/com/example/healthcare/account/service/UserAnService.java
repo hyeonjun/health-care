@@ -5,12 +5,14 @@ import com.example.healthcare.account.domain.code.AuthorityType;
 import com.example.healthcare.account.repository.UserRepository;
 import com.example.healthcare.account.service.dto.CreateUserDTO;
 import com.example.healthcare.account.service.dto.ReissueTokenDTO;
+import com.example.healthcare.account.service.dto.UpdateUserDTO;
 import com.example.healthcare.common.exception.CommonException;
 import com.example.healthcare.common.response.CommonResponse;
 import com.example.healthcare.common.response.CommonResponseCode;
 import com.example.healthcare.security.jwt.JwtUtil;
+import com.example.healthcare.security.user.UserDetailsImpl;
 import com.example.healthcare.util.PasswordProvider;
-import com.example.healthcare.vo.ReissueTokenVO;
+import com.example.healthcare.vo.TokenVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -39,18 +41,21 @@ public class UserAnService {
     userRepository.save(user);
   }
 
-  public CommonResponse<ReissueTokenVO> reissueToken(ReissueTokenDTO dto, UserDetails userDetails) {
+  public CommonResponse<TokenVO> reissueToken(ReissueTokenDTO dto, UserDetailsImpl userDetails) {
     ValueOperations<String, String> values = redisTemplate.opsForValue();
-
-    if(Objects.equals(values.get(dto.userId()), dto.refreshToken())){
-      String username = userDetails.getUsername();
+//    String userId = String.valueOf(userDetails.getUserId());
+    String userId = "1";
+    if(Objects.equals(values.get(userId), dto.refreshToken())){
       AuthorityType authorityType = convertAuthorities(userDetails.getAuthorities());
-      String accessToken = jwtUtil.createAccessToken(username, authorityType);
-      return CommonResponse.success(new ReissueTokenVO(accessToken, dto.refreshToken()));
+      String accessToken = jwtUtil.createAccessToken(userId, authorityType);
+      return CommonResponse.success(new TokenVO(accessToken, dto.refreshToken()));
     }
     else{
       throw new CommonException(CommonResponseCode.FAIL, "Refresh token verification failed");
     }
+  }
+
+  public void userUpdate(UpdateUserDTO dto) {
   }
 
   private AuthorityType convertAuthorities(Collection<? extends GrantedAuthority> authorities) {
@@ -59,5 +64,6 @@ public class UserAnService {
     }
     throw new IllegalArgumentException("No valid authority found for user");
   }
+
 
 }

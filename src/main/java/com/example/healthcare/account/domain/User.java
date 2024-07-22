@@ -47,7 +47,6 @@ public class User extends Base {
   private LocalDateTime recentChangeStatusDateTime;
 
   public User(CreateUserDTO dto, String encodedPassword) {
-
     this.email = dto.email();
     this.nickname = dto.nickname();
     this.mobile = dto.mobile();
@@ -55,7 +54,8 @@ public class User extends Base {
     this.password = encodedPassword;
     this.userStatus = ACTIVATED;
     this.authorityType = COMMON;
-    // 시간 추가
+    this.signUpDateTime = LocalDateTime.now();
+    this.recentChangeStatusDateTime = LocalDateTime.now();
 
   }
 

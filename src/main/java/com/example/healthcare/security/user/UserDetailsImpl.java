@@ -1,6 +1,7 @@
 package com.example.healthcare.security.user;
 
 import com.example.healthcare.account.domain.User;
+import com.example.healthcare.account.domain.code.AuthorityType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,15 +33,12 @@ public class UserDetailsImpl implements UserDetails {
     public String getUsername() {
         return user.getName();
     }
-    public String getUserEmail(){
-        return user.getEmail();
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String authorityType = String.valueOf(user.getAuthorityType());
+        String authority = String.valueOf(user.getAuthorityType());
 
-        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authorityType);
+        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(simpleGrantedAuthority);
 
