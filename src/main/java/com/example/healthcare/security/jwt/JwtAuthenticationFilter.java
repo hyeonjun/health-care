@@ -3,6 +3,7 @@ package com.example.healthcare.security.jwt;
 import com.example.healthcare.account.domain.code.AuthorityType;
 import com.example.healthcare.account.service.dto.LoginDTO;
 import com.example.healthcare.security.user.UserDetailsImpl;
+import com.example.healthcare.vo.TokenVO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import java.io.IOException;
 
+import static com.example.healthcare.security.jwt.JwtUtil.TOKEN;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 @RequiredArgsConstructor
@@ -30,8 +32,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        log.info("request uri: {}", request.getRequestURI());
-
         try {
             LoginDTO dto = new ObjectMapper().readValue(request.getInputStream(), LoginDTO.class);
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
@@ -40,7 +40,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             );
             return getAuthenticationManager().authenticate(usernamePasswordAuthenticationToken);
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -48,18 +47,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
 
-        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUserEmail();
         AuthorityType authorityType = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getAuthorityType();
-        Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();
+        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail();
 
         String accessToken = jwtUtil.createAccessToken(email, authorityType);
-        response.addHeader(JwtUtil.ACCESS_TOKEN, accessToken);
-
         String refreshToken = jwtUtil.createRefreshToken(email);
-        response.addHeader(JwtUtil.REFRESH_TOKEN, refreshToken);
+        TokenVO vo = new TokenVO(accessToken, refreshToken);
+        String token = vo.toJson();
+        response.addHeader(TOKEN, token);
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(userId.toString(), refreshToken, 30, TimeUnit.DAYS);
+        valueOperations.set(email, refreshToken, 30, TimeUnit.DAYS);
 
         response.setStatus(200);
     }

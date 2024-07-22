@@ -2,6 +2,9 @@ package com.example.healthcare.security.jwt;
 
 import com.example.healthcare.security.user.UserDetailsImpl;
 import com.example.healthcare.security.user.UserDetailsServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,8 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.example.healthcare.security.jwt.JwtUtil.ACCESS_TOKEN;
-import static com.example.healthcare.security.jwt.JwtUtil.BEARER_PREFIX;
+import static com.example.healthcare.security.jwt.JwtUtil.*;
 
 @Slf4j(topic = "JWT 검증 및 인가")
 @RequiredArgsConstructor
@@ -52,23 +54,30 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     // 인증 처리
-    public void setAuthentication(String username) {
-        Authentication authentication = createAuthentication(username);
+    public void setAuthentication(String email) {
+        Authentication authentication = createAuthentication(email);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("인증처리: {}", (SecurityContextHolder.getContext().getAuthentication()));
     }
 
     // 인증 객체 생성
-    private Authentication createAuthentication(String username) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+    private Authentication createAuthentication(String email) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(email);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    // header 에서 ACCESS TOKEN 가져오는 메서드
-    private String getJwtFromHeader(HttpServletRequest request) {
-        String accessToken = request.getHeader(ACCESS_TOKEN);
+    // header 에서 TOKEN 추출 후, AccessToken 을 가져오는 메서드
+    private String getJwtFromHeader(HttpServletRequest request) throws JsonProcessingException {
+        String token = request.getHeader(TOKEN);
+        String accessToken = null;
+        if (StringUtils.hasText(token)) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode tokenNode = objectMapper.readTree(token);
+                accessToken = tokenNode.get("accessToken").asText();
+        }
+
         if (StringUtils.hasText(accessToken) && accessToken.startsWith(BEARER_PREFIX)) {
-            return accessToken.substring(7);
+            return accessToken.substring(BEARER_PREFIX.length());
         }
         return null;
     }
