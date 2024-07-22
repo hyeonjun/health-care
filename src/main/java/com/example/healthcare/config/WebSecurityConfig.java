@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -83,18 +82,12 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         );
 
         http
-//                .cors(withDefaults())
                 .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests((authorizeHttpRequests) ->
+                .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,
-                                        "/api/v1/an/**").permitAll()
-                                .requestMatchers(HttpMethod.POST,
-                                        "/api/v1/an/**").permitAll()
-                                .anyRequest().authenticated() // 그 외 모든 요청 인증처리
-
+                                .requestMatchers("/api/v1/an/**").permitAll()
+                                .anyRequest().authenticated() // 모든 요청 인증 처리
                 );
         http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
