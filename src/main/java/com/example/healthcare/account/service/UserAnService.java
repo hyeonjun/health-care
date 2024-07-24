@@ -1,27 +1,22 @@
 package com.example.healthcare.account.service;
 
 import com.example.healthcare.account.domain.User;
-import com.example.healthcare.account.domain.code.AuthorityType;
 import com.example.healthcare.account.repository.UserRepository;
 import com.example.healthcare.account.service.dto.CreateUserDTO;
 import com.example.healthcare.account.service.dto.ReissueTokenDTO;
-import com.example.healthcare.account.service.dto.UpdateUserDTO;
-import com.example.healthcare.common.exception.CommonException;
-import com.example.healthcare.common.response.CommonResponse;
-import com.example.healthcare.common.response.CommonResponseCode;
-import com.example.healthcare.security.jwt.JwtUtil;
-import com.example.healthcare.security.user.UserDetailsImpl;
+import com.example.healthcare.common.exception.AuthException;
+import com.example.healthcare.common.exception.AuthException.AuthExceptionCode;
+import com.example.healthcare.common.exception.ResourceException;
+import com.example.healthcare.common.exception.ResourceException.ResourceExceptionCode;
+import com.example.healthcare.config.security.jwt.JwtUtil;
 import com.example.healthcare.util.PasswordProvider;
 import com.example.healthcare.vo.TokenVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Objects;
 
 
@@ -41,29 +36,17 @@ public class UserAnService {
     userRepository.save(user);
   }
 
-  public CommonResponse<TokenVO> reissueToken(ReissueTokenDTO dto, UserDetailsImpl userDetails) {
+  public TokenVO reissueToken(ReissueTokenDTO dto) {
     ValueOperations<String, String> values = redisTemplate.opsForValue();
-//    String userId = String.valueOf(userDetails.getUserId());
-    String userId = "1";
-    if(Objects.equals(values.get(userId), dto.refreshToken())){
-      AuthorityType authorityType = convertAuthorities(userDetails.getAuthorities());
-      String accessToken = jwtUtil.createAccessToken(userId, authorityType);
-      return CommonResponse.success(new TokenVO(accessToken, dto.refreshToken()));
-    }
-    else{
-      throw new CommonException(CommonResponseCode.FAIL, "Refresh token verification failed");
-    }
-  }
+    User user = userRepository.findByEmail(dto.email())
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
-  public void userUpdate(UpdateUserDTO dto) {
-  }
-
-  private AuthorityType convertAuthorities(Collection<? extends GrantedAuthority> authorities) {
-    for (GrantedAuthority authority : authorities) {
-      return AuthorityType.valueOf(authority.getAuthority());
+    if (!Objects.equals(values.get(user.getEmail()), dto.refreshToken())) {
+      throw new AuthException(AuthExceptionCode.JWT_REFRESH_TOKEN_VERIFICATION_FAIL);
     }
-    throw new IllegalArgumentException("No valid authority found for user");
-  }
 
+    String accessToken = jwtUtil.createAccessToken(user.getEmail(), user.getAuthorityType());
+    return new TokenVO(accessToken, dto.refreshToken());
+  }
 
 }

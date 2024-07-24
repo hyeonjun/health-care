@@ -4,17 +4,27 @@ server:
 spring:
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: true
+      ddl-auto: create
+#    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
+    database: mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/health-care?rewriteBatchedStatements=true&profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999
+    url: jdbc:mysql://127.0.0.1:3306/healthCare?rewriteBatchedStatements=true&profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999
     username: root
     password: 1234
+    hikari:
+      connection-test-query: SELECT 1
+      maximum-pool-size: 3
+      connection-timeout: 5000
+      minimum-idle: 1
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 
 logging:
   level:
@@ -22,3 +32,7 @@ logging:
       springframework:
         jdbc:
           core: TRACE
+
+jwt:
+  secret:
+    key: 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz

@@ -1,4 +1,4 @@
-package com.example.healthcare.redis;
+package com.example.healthcare.config.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

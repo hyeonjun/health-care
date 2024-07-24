@@ -1,8 +1,8 @@
-package com.example.healthcare.security.jwt;
+package com.example.healthcare.config.security.jwt;
 
 import com.example.healthcare.account.domain.code.AuthorityType;
 import com.example.healthcare.account.service.dto.LoginDTO;
-import com.example.healthcare.security.user.UserDetailsImpl;
+import com.example.healthcare.config.security.user.LoginUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,9 +48,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
 
-        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail();
-        AuthorityType authorityType = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getAuthorityType();
-        Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();
+        String email = ((LoginUser) authResult.getPrincipal()).getEmail();
+        AuthorityType authorityType = ((LoginUser) authResult.getPrincipal()).getAuthorityType();
+        Long userId = ((LoginUser) authResult.getPrincipal()).getId();
 
         String accessToken = jwtUtil.createAccessToken(email, authorityType);
         response.addHeader(JwtUtil.ACCESS_TOKEN, accessToken);

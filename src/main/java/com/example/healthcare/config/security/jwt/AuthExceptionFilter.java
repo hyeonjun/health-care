@@ -1,4 +1,4 @@
-package com.example.healthcare.security.jwt;
+package com.example.healthcare.config.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
