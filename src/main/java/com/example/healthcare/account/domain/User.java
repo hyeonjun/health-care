@@ -2,6 +2,7 @@ package com.example.healthcare.account.domain;
 
 import com.example.healthcare.account.domain.code.AuthorityType;
 import com.example.healthcare.account.domain.code.UserStatus;
+import com.example.healthcare.account.service.dto.CreateUserDTO;
 import com.example.healthcare.common.domain.Base;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -11,6 +12,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
+
+import static com.example.healthcare.account.domain.code.AuthorityType.COMMON;
+import static com.example.healthcare.account.domain.code.UserStatus.ACTIVATED;
 
 @Entity
 @DynamicUpdate
@@ -22,14 +26,12 @@ public class User extends Base {
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "user_id")
   private Long id;
-
-  @Column(name = "login_id", length = 191, unique = true)
-  private String loginId;
   @Column(name = "email", nullable = false, length = 191, unique = true)
   private String email;
   @Column(nullable = false)
   private String nickname;
   private String mobile;
+  @Column(nullable = false)
   private String name;
   @JsonIgnore
   @Column(nullable = false)
@@ -43,5 +45,21 @@ public class User extends Base {
   private LocalDateTime signUpDateTime;
   private LocalDateTime recentSignInDateTime;
   private LocalDateTime recentChangeStatusDateTime;
+
+  public User(CreateUserDTO dto, String encodedPassword) {
+    this.email = dto.email();
+    this.nickname = dto.nickname();
+    this.mobile = dto.mobile();
+    this.name = dto.name();
+    this.password = encodedPassword;
+    this.userStatus = ACTIVATED;
+    this.authorityType = COMMON;
+    this.signUpDateTime = LocalDateTime.now();
+    this.recentChangeStatusDateTime = LocalDateTime.now();
+
+  }
+  public void changeAuthority(AuthorityType authorityType){
+    this.authorityType = authorityType;
+  }
 
 }
