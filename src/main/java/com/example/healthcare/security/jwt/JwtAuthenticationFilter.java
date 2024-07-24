@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
 
-        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUserEmail();
+        String email = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getEmail();
         AuthorityType authorityType = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getAuthorityType();
         Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getId();
 

@@ -85,17 +85,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         http
 //                .cors(withDefaults())
                 .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests((authorizeHttpRequests) ->
-                        authorizeHttpRequests
+                .authorizeHttpRequests((authorize) ->
+                        authorize
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,
-                                        "/api/v1/an/**").permitAll()
-                                .requestMatchers(HttpMethod.POST,
-                                        "/api/v1/an/**").permitAll()
-                                .anyRequest().authenticated() // 그 외 모든 요청 인증처리
-
+                                .requestMatchers("/api/v1/an/**").permitAll()
+                                .anyRequest().authenticated()
                 );
+
         http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
 
