@@ -58,5 +58,8 @@ public class User extends Base {
     this.recentChangeStatusDateTime = LocalDateTime.now();
 
   }
+  public void changeAuthority(AuthorityType authorityType){
+    this.authorityType = authorityType;
+  }
 
 }

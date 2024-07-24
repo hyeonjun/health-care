@@ -6,12 +6,10 @@ import com.example.healthcare.account.service.dto.ReissueTokenDTO;
 import com.example.healthcare.account.service.dto.UpdateUserDTO;
 import com.example.healthcare.common.response.CommonResponse;
 import com.example.healthcare.security.user.UserDetailsImpl;
-import com.example.healthcare.security.user.UserDetailsServiceImpl;
 import com.example.healthcare.vo.TokenVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
