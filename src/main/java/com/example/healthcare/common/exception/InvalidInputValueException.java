@@ -1,9 +1,11 @@
 package com.example.healthcare.common.exception;
 
 import com.example.healthcare.common.response.ResponseCode;
+import lombok.AllArgsConstructor;
 
 public class InvalidInputValueException extends CommonException {
 
+  @AllArgsConstructor
   public enum InvalidInputValueExceptionCode implements ResponseCode {
     INVALID_INPUT_VALUE("IIV-001", "invalid input value"),
     METHOD_ARGUMENT_TYPE_MISMATCH("IIV-002", "method argument type mismatch"),
@@ -11,11 +13,6 @@ public class InvalidInputValueException extends CommonException {
 
     private final String code;
     private final String message;
-
-    InvalidInputValueExceptionCode(String code, String message) {
-      this.code = code;
-      this.message = message;
-    }
 
     @Override
     public String getCode() {

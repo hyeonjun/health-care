@@ -4,9 +4,5 @@ import com.example.healthcare.account.domain.code.AuthorityType;
 import jakarta.validation.constraints.NotNull;
 
 public record ChangeAuthorityDTO(
-        @NotNull
-        Long userId,
-        @NotNull
-        AuthorityType authorityType
-) {
+  @NotNull AuthorityType authorityType) {
 }

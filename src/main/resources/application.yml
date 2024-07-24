@@ -13,6 +13,10 @@ spring:
       path: /h2
   datasource:
     url: jdbc:h2:mem:test
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 
 logging:
   level:

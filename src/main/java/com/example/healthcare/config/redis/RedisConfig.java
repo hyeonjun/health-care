@@ -1,4 +1,4 @@
-package com.example.healthcare.redis;
+package com.example.healthcare.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
