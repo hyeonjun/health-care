@@ -15,7 +15,7 @@ public class AccessTokenBlackList {
   @Id
   private String accessToken;
 
-  @Builder(builderMethodName = "createaAcessTokenBlacklist")
+  @Builder(builderMethodName = "createAccessTokenBlacklist")
   public AccessTokenBlackList(String accessToken) {
     this.accessToken = accessToken;
   }
