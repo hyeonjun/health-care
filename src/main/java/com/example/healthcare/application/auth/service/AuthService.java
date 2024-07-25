@@ -1,5 +1,6 @@
 package com.example.healthcare.application.auth.service;
 
+import com.example.healthcare.application.auth.domain.AccessTokenBlackList;
 import com.example.healthcare.event.user.UserEventPublisher;
 import com.example.healthcare.application.auth.domain.RefreshToken;
 import com.example.healthcare.application.auth.repository.AccessTokenBlackListRepository;
@@ -77,7 +78,11 @@ public class AuthService {
     }
 
     refreshTokenRepository.deleteById(loginUser.getEmail());
-    accessTokenBlackListRepository.deleteById(dto.accessToken());
+
+    AccessTokenBlackList blackList = AccessTokenBlackList.createAccessTokenBlacklist()
+      .accessToken(dto.accessToken())
+      .build();
+    accessTokenBlackListRepository.save(blackList);
     SecurityContextHolder.clearContext();
   }
 
