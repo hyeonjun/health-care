@@ -3,10 +3,12 @@ server:
 
 spring:
   jpa:
-    generate-ddl: true
     hibernate:
       ddl-auto: update
-
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   h2:
     console:
       enabled: true
@@ -18,9 +20,11 @@ spring:
       host: 127.0.0.1
       port: 6379
 
-logging:
-  level:
-    org:
-      springframework:
-        jdbc:
-          core: TRACE
+jwt:
+  secret:
+    key: abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  token:
+    access:
+      expiration_time: 600000
+    refresh:
+      expiration_time: 1800000

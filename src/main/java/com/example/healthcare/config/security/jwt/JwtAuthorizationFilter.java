@@ -1,73 +1,41 @@
 package com.example.healthcare.config.security.jwt;
 
-import com.example.healthcare.config.security.user.LoginUser;
-import com.example.healthcare.config.security.user.UserDetailsServiceImpl;
-import io.jsonwebtoken.Claims;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AuthorizationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j(topic = "JWT 검증 및 인가")
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
-    private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
 
+  public static final String AUTHORIZATION_HEADER = "Authorization";
+  public static final String BEARER_TYPE = "Bearer ";
+  private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-        String tokenValue = getJwtFromHeader(req);
-        if (StringUtils.hasText(tokenValue)) {
-            if (!jwtUtil.validateToken(tokenValue)) {
-                return;
-            }
+  @Override
+  protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response,
+    FilterChain filterChain) throws ServletException, IOException {
+    Optional.ofNullable(resolveToken(request))
+      .filter(jwtAuthenticationProvider::validateToken)
+      .map(jwtAuthenticationProvider::getAuthentication)
+      .ifPresent(SecurityContextHolder.getContext()::setAuthentication);
+    filterChain.doFilter(request, response);
+  }
 
-            Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
-            log.info("info:{}", info.getSubject());
-
-            try {
-                setAuthentication(info.getSubject());
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                throw new AuthorizationServiceException(e.getMessage());
-
-            }
-        }
-
-        filterChain.doFilter(req, res);
-    }
-
-    // 인증 처리
-    public void setAuthentication(String username) {
-        Authentication authentication = createAuthentication(username);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("인증처리: {}", (SecurityContextHolder.getContext().getAuthentication()));
-    }
-
-    // 인증 객체 생성
-    private Authentication createAuthentication(String username) {
-        LoginUser userDetails = (LoginUser) userDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
-
-    // header 에서 ACCESS TOKEN 가져오는 메서드
-    private String getJwtFromHeader(HttpServletRequest request) {
-        String accessToken = request.getHeader(JwtUtil.ACCESS_TOKEN);
-        if (StringUtils.hasText(accessToken) && accessToken.startsWith(JwtUtil.BEARER_PREFIX)) {
-            return accessToken.substring(7);
-        }
-        return null;
-    }
-
+  private String resolveToken(HttpServletRequest request) {
+    return Optional.ofNullable(request.getHeader(AUTHORIZATION_HEADER))
+      .filter(token -> StringUtils.hasText(token) && token.startsWith(BEARER_TYPE))
+      .map(token -> token.substring(BEARER_TYPE.length()))
+      .orElse(null);
+  }
 }

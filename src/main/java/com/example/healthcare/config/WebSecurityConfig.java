@@ -1,44 +1,39 @@
 package com.example.healthcare.config;
 
 import com.example.healthcare.account.domain.code.AuthorityType;
-import com.example.healthcare.config.security.jwt.AuthExceptionFilter;
-import com.example.healthcare.config.security.jwt.JwtAuthenticationFilter;
+import com.example.healthcare.config.security.jwt.JwtAuthenticationProvider;
 import com.example.healthcare.config.security.jwt.JwtAuthorizationFilter;
-import com.example.healthcare.config.security.jwt.JwtUtil;
-import com.example.healthcare.config.security.user.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig implements WebMvcConfigurer {
+public class WebSecurityConfig {
 
-  private final JwtUtil jwtUtil;
-  private final UserDetailsServiceImpl userDetailsService;
-  private final AuthenticationConfiguration authenticationConfiguration;
-  private final static String LOGIN_URL = "/api/v1/sign-in";
-  private final static String LOGOUT_URL = "/api/v1/sign-out";
+  private final JwtAuthenticationProvider jwtAuthenticationProvider;
+  private final static String LOGIN_URL = "/api/v1/auth/login";
+  private final static String LOGOUT_URL = "/api/v1/auth/logout";
+  private final static String TOKEN_REISSUE = "/api/v1/auth/reissue:token";
 
 
   @Bean
@@ -55,49 +50,57 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     return source;
   }
 
-
   @Bean
   public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-    return configuration.getAuthenticationManager();
-  }
-
-  @Bean
-  public JwtAuthenticationFilter jwtAuthenticationFilter(RedisTemplate redisTemplate) throws Exception {
-    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, redisTemplate);
-    filter.setFilterProcessesUrl(LOGIN_URL);
-    filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
-    return filter;
+  public GrantedAuthorityDefaults grantedAuthorityDefaults() {
+    return new GrantedAuthorityDefaults("");
   }
 
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() {
-    // todo 이후 필요 시 추가
-    return WebSecurity::ignoring; //.anyRequest().requestMatchers("");
+    return web -> web
+      .ignoring().requestMatchers( "/h2-console/**", "/v3/api-docs",
+        "/swagger-ui/**", "/swagger-resources/**", "/swagger-ui.html",
+        "/webjars/**", "/swagger/**");
   }
-
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
       .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
       .csrf(AbstractHttpConfigurer::disable)
-      .addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class)
-      .addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class)
+      .formLogin(AbstractHttpConfigurer::disable)
+      .httpBasic(AbstractHttpConfigurer::disable)
+      .addFilterBefore(new JwtAuthorizationFilter(jwtAuthenticationProvider), UsernamePasswordAuthenticationFilter.class)
       .sessionManagement((sessionManagement) ->
         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .exceptionHandling((exceptionHandling) -> exceptionHandling
+          .authenticationEntryPoint(authenticationEntryPoint())
+          .accessDeniedHandler(accessDeniedHandler()))
       .authorizeHttpRequests((authorize) ->
         authorize
           .requestMatchers("/api/v1/sy/**").hasRole(AuthorityType.SYSTEM.getValue())
           .requestMatchers("/api/v1/cm/**").hasRole(AuthorityType.COMMON.getValue())
           .requestMatchers("/api/v1/tr/**").hasRole(AuthorityType.TRAINER.getValue())
           .requestMatchers(LOGOUT_URL).authenticated()
-          .requestMatchers(LOGIN_URL).permitAll()
+          .requestMatchers(LOGIN_URL, TOKEN_REISSUE, "/api/v1/an/**").permitAll()
           .anyRequest().denyAll()
       ).build();
+  }
+
+  @Bean
+  public AuthenticationEntryPoint authenticationEntryPoint() {
+    return (_, response, _) ->
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+  }
+
+  @Bean
+  public AccessDeniedHandler accessDeniedHandler() {
+    return (_, response, _) ->
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
   }
 }

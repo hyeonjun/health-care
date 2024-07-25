@@ -2,6 +2,8 @@ package com.example.healthcare.account.domain.code;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 public enum AuthorityType {
 
@@ -13,5 +15,12 @@ public enum AuthorityType {
 
   AuthorityType(String value) {
     this.value = value;
+  }
+
+  public static AuthorityType of(String name) {
+    return Arrays.stream(AuthorityType.values())
+      .filter(a -> a.name().equals(name))
+      .findFirst()
+      .orElse(null);
   }
 }
