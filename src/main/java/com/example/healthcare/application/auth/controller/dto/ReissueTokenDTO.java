@@ -1,4 +1,4 @@
-package com.example.healthcare.application.auth.service.dto;
+package com.example.healthcare.application.auth.controller.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

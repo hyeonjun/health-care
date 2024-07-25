@@ -2,7 +2,7 @@ package com.example.healthcare.application.exercise.service;
 
 import com.example.healthcare.application.exercise.domain.Exercise;
 import com.example.healthcare.application.exercise.repository.ExerciseRepository;
-import com.example.healthcare.application.exercise.service.dto.CreateSyExerciseDTO;
+import com.example.healthcare.application.exercise.controller.dto.CreateSyExerciseDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

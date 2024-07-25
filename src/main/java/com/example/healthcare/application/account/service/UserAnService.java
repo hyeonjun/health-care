@@ -2,7 +2,7 @@ package com.example.healthcare.application.account.service;
 
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.account.repository.UserRepository;
-import com.example.healthcare.application.account.service.dto.CreateUserDTO;
+import com.example.healthcare.application.account.controller.dto.CreateUserDTO;
 import com.example.healthcare.application.common.exception.DuplicateException;
 import com.example.healthcare.application.common.exception.DuplicateException.DuplicateExceptionCode;
 import lombok.RequiredArgsConstructor;

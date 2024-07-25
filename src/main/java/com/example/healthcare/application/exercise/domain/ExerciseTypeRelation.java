@@ -16,7 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class ExerciseTypeRelation extends Base {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "exercise_type_relation_id")
   private Long id;
 

@@ -15,7 +15,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class UserExerciseRoutine extends Base {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_exercise_routine_id")
   private Long id;
 

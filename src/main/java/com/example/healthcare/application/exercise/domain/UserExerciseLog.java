@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 public class UserExerciseLog extends Base {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_exercise_log_id")
   private Long id;
 

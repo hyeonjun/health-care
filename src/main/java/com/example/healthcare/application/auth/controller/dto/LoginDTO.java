@@ -1,4 +1,4 @@
-package com.example.healthcare.application.auth.service.dto;
+package com.example.healthcare.application.auth.controller.dto;
 
 import com.example.healthcare.util.RegexUtil;
 import com.example.healthcare.util.VerifyUtil;
