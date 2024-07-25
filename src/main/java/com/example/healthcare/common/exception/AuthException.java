@@ -9,6 +9,9 @@ public class AuthException extends CommonException {
   public enum AuthExceptionCode implements ResponseCode {
     UNKNOWN_AUTH_ERROR("AEC-001", "unknown auth error"),
     JWT_REFRESH_TOKEN_VERIFICATION_FAIL("AEC-002", "Refresh token verification failed"),
+    ALREADY_LOGOUT("AEC-003", "already logged out"),
+    NOT_AUTHENTICATED("AEC-004", "not authenticated"),
+    NOT_AUTHORIZED("AEC-005", "not authorized"),
     ;
 
     private final String code;

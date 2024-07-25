@@ -1,13 +1,13 @@
 package com.example.healthcare.vo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+public record TokenVO(
+  String email,
+  String accessToken,
+  String refreshToken)
+{
 
-public record TokenVO(String accessToken, String refreshToken) {
+  public static TokenVO valueOf(String email, String accessToken, String refreshToken) {
+    return new TokenVO(email, accessToken, refreshToken);
+  }
 
-    // 토큰을 Json 형식으로 변환
-    public String toJson() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(this);
-    }
 }

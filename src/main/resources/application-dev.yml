@@ -5,7 +5,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-#    show-sql: true
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -26,13 +26,11 @@ spring:
       host: 127.0.0.1
       port: 6379
 
-logging:
-  level:
-    org:
-      springframework:
-        jdbc:
-          core: TRACE
-
 jwt:
   secret:
-    key: 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+    key: f1911415b21fdb5fa9b8996b670b2c5b710f1e8e617ed2892c3df07e6d9120c594e941660fe879f6882c2f83c71cb27dfd25783177f08852cc72b06c7bf8c862
+  token:
+    access:
+      expiration_time: 600000
+    refresh:
+      expiration_time: 1800000
