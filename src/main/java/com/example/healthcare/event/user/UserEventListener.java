@@ -1,4 +1,4 @@
-package com.example.healthcare.application.account.event;
+package com.example.healthcare.event.user;
 
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.account.repository.UserRepository;

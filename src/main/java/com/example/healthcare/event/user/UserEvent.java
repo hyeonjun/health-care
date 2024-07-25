@@ -1,4 +1,4 @@
-package com.example.healthcare.application.account.event;
+package com.example.healthcare.event.user;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

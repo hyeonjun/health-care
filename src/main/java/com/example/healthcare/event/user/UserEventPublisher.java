@@ -1,4 +1,4 @@
-package com.example.healthcare.application.account.event;
+package com.example.healthcare.event.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
