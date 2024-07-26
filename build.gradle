@@ -2,6 +2,7 @@ buildscript {
     ext {
         queryDslVersion = "5.1.0"
         jwtVersion = "0.12.5"
+        testContainers = "1.20.0"
     }
 }
 
@@ -65,6 +66,11 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    implementation "org.testcontainers:jdbc:${testContainers}"
+    testImplementation "org.testcontainers:testcontainers:${testContainers}"
+    testImplementation "org.testcontainers:junit-jupiter:${testContainers}"
+    testImplementation "org.testcontainers:mysql:${testContainers}"
 }
 
 tasks.named('test') {

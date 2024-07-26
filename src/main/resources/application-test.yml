@@ -7,16 +7,22 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2
+    database-platform: org.hibernate.dialect.MySQLDialect
+    database: mysql
+#    defer-datasource-initialization: true
+#    generate-ddl: true
   datasource:
-    url: jdbc:h2:mem:test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:mysql:8.0.35://test?sessionVariables=sql_mode=''&TC_INITSCRIPT=data/schema.sql
+    hikari:
+      connection-test-query: SELECT 1
+      maximum-pool-size: 3
+      connection-timeout: 5000
+      minimum-idle: 1
   data:
     redis:
       host: 127.0.0.1
