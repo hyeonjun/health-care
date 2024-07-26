@@ -9,7 +9,8 @@ public class ExerciseException extends CommonException {
   @AllArgsConstructor
   public enum ExerciseExceptionCode implements ResponseCode {
     INVALID_EXERCISE("EEC-001", "invalid exercise"),
-    NOT_FOUND_RELATION_EXERCISE_TYPE("EEC-002", "relation exercise type not found")
+    NOT_FOUND_RELATION_EXERCISE_TYPE("EEC-002", "relation exercise type not found"),
+    DELETED_EXERCISE("EEC-003", "deleted exercise"),
     ;
 
     private final String code;

@@ -1,5 +1,6 @@
 package com.example.healthcare.application.auth.service;
 
+import com.example.healthcare.application.account.domain.code.UserStatus;
 import com.example.healthcare.application.auth.domain.AccessTokenBlackList;
 import com.example.healthcare.event.user.UserEventPublisher;
 import com.example.healthcare.application.auth.domain.RefreshToken;
@@ -46,6 +47,10 @@ public class AuthService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+    if (!UserStatus.ACTIVATED.equals(loginUser.getUserStatus())) {
+      return TokenVO.valueOf(loginUser.getEmail(), loginUser.getUserStatus());
+    }
+
     TokenVO vo = jwtUtil.createToken(loginUser);
 
     RefreshToken refreshToken = RefreshToken.createRefreshToken()
@@ -100,6 +105,6 @@ public class AuthService {
       .orElseThrow(() -> new AuthException(AuthExceptionCode.JWT_REFRESH_TOKEN_VERIFICATION_FAIL));
 
     String newAccessToken = jwtUtil.createAccessToken(loginUser, new Date());
-    return TokenVO.valueOf(loginUser.getEmail(), newAccessToken, refreshToken.getRefreshToken());
+    return TokenVO.valueOf(loginUser, newAccessToken, refreshToken.getRefreshToken());
   }
 }

@@ -1,5 +1,7 @@
 package com.example.healthcare.repository.exercise;
 
+import com.example.healthcare.application.account.domain.code.AuthorityType;
+import com.example.healthcare.application.exercise.controller.dto.SearchExerciseDTO;
 import com.example.healthcare.application.exercise.domain.code.ExerciseBodyType;
 import com.example.healthcare.application.exercise.repository.ExerciseRepository;
 import com.example.healthcare.application.exercise.repository.param.SearchExerciseParam;
@@ -25,8 +27,11 @@ public class ExerciseRepositoryTest {
 
   @Test
   void findAllTest() {
-    SearchExerciseParam param = new SearchExerciseParam(
-      "name", ExerciseBodyType.LEG, 1L);
+    SearchExerciseDTO dto = new SearchExerciseDTO();
+    dto.setExerciseBodyType(ExerciseBodyType.LEG);
+    dto.setName("name");
+
+    SearchExerciseParam param = SearchExerciseParam.valueOf(dto, null, AuthorityType.GUEST);
 
     Page<ExerciseVO> result = exerciseRepository.findAll(param, PageRequest.of(0, 100));
     assertThat(result).isNotNull();

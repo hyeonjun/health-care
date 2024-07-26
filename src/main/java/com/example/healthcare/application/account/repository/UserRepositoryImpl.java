@@ -67,6 +67,10 @@ public class UserRepositoryImpl extends CustomQuerydslRepositorySupport implemen
       whereCondition.and(user.name.contains(param.name()));
     }
 
+    if (!CollectionUtils.isEmpty(param.userStatuses())) {
+      whereCondition.and(user.userStatus.in(param.userStatuses()));
+    }
+
     if (!CollectionUtils.isEmpty(param.authorities())) {
       whereCondition.and(user.authorityType.in(param.authorities()));
     }

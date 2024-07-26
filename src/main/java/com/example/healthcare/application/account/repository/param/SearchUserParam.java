@@ -2,6 +2,7 @@ package com.example.healthcare.application.account.repository.param;
 
 import com.example.healthcare.application.account.controller.dto.SearchUserDTO;
 import com.example.healthcare.application.account.domain.code.AuthorityType;
+import com.example.healthcare.application.account.domain.code.UserStatus;
 import lombok.AccessLevel;
 import lombok.Builder;
 
@@ -14,6 +15,7 @@ public record SearchUserParam(
   String nickname,
   String mobile,
   String name,
+  List<UserStatus> userStatuses,
   List<AuthorityType> authorities,
   LocalDate signUpDateFrom,
   LocalDate signUpDateTo,
@@ -28,6 +30,7 @@ public record SearchUserParam(
       .nickname(dto.getNickname())
       .mobile(dto.getMobile())
       .name(dto.getName())
+      .userStatuses(dto.getUserStatuses())
       .authorities(dto.getAuthorities())
       .signUpDateFrom(dto.getSignUpDateFrom())
       .signUpDateTo(dto.getSignUpDateTo())

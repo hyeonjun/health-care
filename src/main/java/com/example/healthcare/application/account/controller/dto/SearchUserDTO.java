@@ -1,6 +1,7 @@
 package com.example.healthcare.application.account.controller.dto;
 
 import com.example.healthcare.application.account.domain.code.AuthorityType;
+import com.example.healthcare.application.account.domain.code.UserStatus;
 import com.example.healthcare.util.PagingDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,7 @@ public class SearchUserDTO extends PagingDTO {
   private String nickname;
   private String mobile;
   private String name;
+  private List<UserStatus> userStatuses;
   private List<AuthorityType> authorities;
 
   @DateTimeFormat(iso = ISO.DATE)
