@@ -30,7 +30,7 @@ public class SyUserController {
   }
 
   // 권한 수정
-  @PutMapping(value = "/{user-id}/roles", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/{user-id}/authority", consumes = MediaType.APPLICATION_JSON_VALUE)
   public void changeAuthority(
     @PathVariable(value = "user-id") long userId,
     @Valid @RequestBody ChangeAuthorityDTO dto) {
