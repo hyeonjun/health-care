@@ -1,9 +1,11 @@
 -- 2024.07.26
 create table exercise
 (
+    is_deleted         bit                                                                               not null,
     created_date_time  datetime(6),
     exercise_id        bigint                                                                            not null auto_increment,
     updated_date_time  datetime(6),
+    user_id            bigint                                                                            not null,
     name               varchar(191)                                                                      not null,
     description        varchar(3000),
     exercise_body_type enum ('ABS','ARM','BACK','CARDIO','CHEST','ETC','LEG','SHOULDER','WIGHT_LIFTING') not null,
@@ -14,10 +16,10 @@ create table exercise
 create table exercise_type_relation
 (
     created_date_time         datetime(6),
-    exercise_id               bigint not null,
-    exercise_type_relation_id bigint not null auto_increment,
+    exercise_id               bigint                        not null,
+    exercise_type_relation_id bigint                        not null auto_increment,
     updated_date_time         datetime(6),
-    exercise_type             enum ('REPS','TIME','WEIGHT'),
+    exercise_type             enum ('REPS','TIME','WEIGHT') not null,
     primary key (exercise_type_relation_id)
 ) engine = InnoDB;
 
@@ -34,8 +36,8 @@ create table user
     name                           varchar(255) not null,
     nickname                       varchar(255) not null,
     password                       varchar(255) not null,
-    authority_type                 enum ('COMMON','SYSTEM','TRAINER'),
-    user_status                    enum ('ACTIVATED','DEACTIVATED','SECESSION'),
+    authority_type                 enum ('CUSTOMER','GUEST','SYSTEM','TRAINER'),
+    user_status                    enum ('ACTIVATED','CANCELLED','DEACTIVATED'),
     primary key (user_id)
 ) engine = InnoDB;
 
@@ -77,11 +79,19 @@ create table user_exercise_set
     primary key (user_exercise_set_id)
 ) engine = InnoDB;
 
+create index IDX55r3luukc7oe20q88depist0m
+    on exercise (exercise_body_type, user_id);
+
 alter table user
     add constraint UKob8kqyqqgmefl0aco34akdtpe unique (email);
 
 alter table user_exercise_log
     add constraint UKr62lumhns2g80n4miymds7bhq unique (exercise_date, exercise_time_type, user_id);
+
+alter table exercise
+    add constraint FK5v547fhplc6po1fgoeqk1dl9f
+        foreign key (user_id)
+            references user (user_id);
 
 alter table exercise_type_relation
     add constraint FKhdfg0clobsfiwkbf7jhfha12j

@@ -23,7 +23,7 @@ public record SearchUserParam(
   LocalDate recentChangeStatusDateTo
 ) {
   public static SearchUserParam valueOf(SearchUserDTO dto) {
-    return SearchUserParam.builder()
+    return builder()
       .email(dto.getEmail())
       .nickname(dto.getNickname())
       .mobile(dto.getMobile())

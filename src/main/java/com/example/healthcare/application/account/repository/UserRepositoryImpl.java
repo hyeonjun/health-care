@@ -7,7 +7,6 @@ import com.example.healthcare.application.vo.UserVO;
 import com.example.healthcare.util.repository.CustomQuerydslRepositorySupport;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +18,7 @@ import static com.example.healthcare.application.account.domain.QUser.user;
 public class UserRepositoryImpl extends CustomQuerydslRepositorySupport implements
   UserRepositoryCustom {
 
-  public UserRepositoryImpl(EntityManager em) {
+  public UserRepositoryImpl() {
     super(User.class);
   }
 
