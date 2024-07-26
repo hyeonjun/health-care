@@ -3,6 +3,7 @@ package com.example.healthcare.application.exercise.domain;
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.common.domain.Base;
 import com.example.healthcare.application.exercise.controller.dto.CreateExerciseDTO;
+import com.example.healthcare.application.exercise.controller.dto.UpdateExerciseDTO;
 import com.example.healthcare.application.exercise.domain.code.ExerciseBodyType;
 import com.example.healthcare.application.exercise.domain.code.ExerciseToolType;
 import jakarta.persistence.Column;
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SQLDelete;
 
 import java.util.Objects;
 
@@ -40,6 +42,7 @@ import java.util.Objects;
     @Index(columnList = "exercise_body_type, user_id")
   }
 )
+@SQLDelete(sql = "UPDATE exercise SET is_deleted = true WHERE exercise_id = ?")
 public class Exercise extends Base {
 
   @Id
@@ -76,6 +79,13 @@ public class Exercise extends Base {
       .toolType(dto.toolType())
       .createdUser(user)
       .build();
+  }
+
+  public void updateExercise(UpdateExerciseDTO dto) {
+    this.name = dto.name();
+    this.description = dto.description();
+    this.bodyType = dto.bodyType();
+    this.toolType = dto.toolType();
   }
 
   @Override
