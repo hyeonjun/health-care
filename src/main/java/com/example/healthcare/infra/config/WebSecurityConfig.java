@@ -84,7 +84,7 @@ public class WebSecurityConfig {
       .authorizeHttpRequests((authorize) ->
         authorize
           .requestMatchers("/api/v1/sy/**").hasRole(AuthorityType.SYSTEM.getValue())
-          .requestMatchers("/api/v1/cm/**").hasRole(AuthorityType.COMMON.getValue())
+          .requestMatchers("/api/v1/cm/**").hasRole(AuthorityType.CUSTOMER.getValue())
           .requestMatchers("/api/v1/tr/**").hasRole(AuthorityType.TRAINER.getValue())
           .requestMatchers(LOGOUT_URL).authenticated()
           .requestMatchers(LOGIN_URL, TOKEN_REISSUE, "/api/v1/an/**").permitAll()
