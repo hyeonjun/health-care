@@ -23,7 +23,7 @@ public class JwtUtil {
   public TokenVO createToken(LoginUser loginUser) {
     Date now = new Date();
 
-    return TokenVO.valueOf(loginUser.getEmail(),
+    return TokenVO.valueOf(loginUser,
       createAccessToken(loginUser, now),
       createRefreshToken(now));
   }

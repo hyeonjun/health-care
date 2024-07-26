@@ -11,5 +11,6 @@ public class SearchExerciseDTO extends PagingDTO {
 
   private String name;
   private ExerciseBodyType exerciseBodyType;
+  private Boolean exerciseDeleted;
 
 }
