@@ -1,5 +1,6 @@
 package com.example.healthcare.application.account.service;
 
+import com.example.healthcare.application.account.controller.dto.CheckExistenceUserDTO;
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.account.repository.UserRepository;
 import com.example.healthcare.application.account.controller.dto.CreateUserDTO;
@@ -13,10 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserAnService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+
+  public boolean getExistence(CheckExistenceUserDTO dto) {
+    return userRepository.findByEmail(dto.email()).isPresent();
+  }
 
   @Transactional
   public void signUp(CreateUserDTO dto) {
