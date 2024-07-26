@@ -33,7 +33,7 @@ public class UserSyService {
       return;
     }
 
-    user.changeAuthority(dto.authorityType());
+    user.updateAuthority(dto.authorityType());
     userRepository.save(user);
   }
 }

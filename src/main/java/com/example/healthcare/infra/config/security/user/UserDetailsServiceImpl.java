@@ -1,5 +1,6 @@
 package com.example.healthcare.infra.config.security.user;
 
+import com.example.healthcare.application.account.domain.code.UserStatus;
 import com.example.healthcare.application.account.repository.UserRepository;
 import com.example.healthcare.application.common.exception.ResourceException;
 import com.example.healthcare.application.common.exception.ResourceException.ResourceExceptionCode;
@@ -17,7 +18,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailAndUserStatusIsNot(email, UserStatus.CANCELLED)
           .map(LoginUser::new)
           .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
     }

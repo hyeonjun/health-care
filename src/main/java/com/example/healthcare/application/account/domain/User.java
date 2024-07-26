@@ -1,8 +1,8 @@
 package com.example.healthcare.application.account.domain;
 
+import com.example.healthcare.application.account.controller.dto.CreateUserDTO;
 import com.example.healthcare.application.account.domain.code.AuthorityType;
 import com.example.healthcare.application.account.domain.code.UserStatus;
-import com.example.healthcare.application.account.controller.dto.CreateUserDTO;
 import com.example.healthcare.application.common.domain.Base;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.jsonwebtoken.Claims;
@@ -60,7 +60,7 @@ public class User extends Base {
     this.name = dto.name();
     this.password = encodedPassword;
     this.userStatus = UserStatus.ACTIVATED;
-    this.authorityType = AuthorityType.COMMON;
+    this.authorityType = AuthorityType.CUSTOMER;
     this.signUpDateTime = LocalDateTime.now();
     this.recentChangeStatusDateTime = LocalDateTime.now();
   }
@@ -73,8 +73,12 @@ public class User extends Base {
     this.password = "";
   }
 
-  public void changeAuthority(AuthorityType authorityType) {
+  public void updateAuthority(AuthorityType authorityType) {
     this.authorityType = authorityType;
+  }
+
+  public void updateUserStatus(UserStatus userStatus) {
+    this.userStatus = userStatus;
   }
 
   public void updateSignInDateTime(LocalDateTime signInDateTime) {

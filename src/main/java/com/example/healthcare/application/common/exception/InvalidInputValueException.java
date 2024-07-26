@@ -9,6 +9,7 @@ public class InvalidInputValueException extends CommonException {
   public enum InvalidInputValueExceptionCode implements ResponseCode {
     INVALID_INPUT_VALUE("IIV-001", "invalid input value"),
     METHOD_ARGUMENT_TYPE_MISMATCH("IIV-002", "method argument type mismatch"),
+    MISMATCHED_PASSWORD("IIV-003", "mismatched password"),
     ;
 
     private final String code;
