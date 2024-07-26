@@ -3,12 +3,13 @@ package com.example.healthcare.application.account.domain.code;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Set;
 
 @Getter
 public enum AuthorityType {
 
   SYSTEM("SYSTEM"),
-  COMMON("COMMON"),
+  CUSTOMER("CUSTOMER"),
   TRAINER("TRAINER"),
   GUEST("GUEST");
   ;
@@ -25,4 +26,11 @@ public enum AuthorityType {
       .findFirst()
       .orElse(GUEST);
   }
+
+  private static final Set<AuthorityType> COMMON_AUTHORITY_TYPES = Set.of(CUSTOMER, TRAINER);
+
+  public static Set<AuthorityType> getCommonAuthorityTypes() {
+    return COMMON_AUTHORITY_TYPES;
+  }
+
 }
