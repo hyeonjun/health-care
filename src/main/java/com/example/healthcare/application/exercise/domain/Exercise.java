@@ -2,7 +2,7 @@ package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.exercise.domain.code.ExerciseBodyType;
 import com.example.healthcare.application.exercise.domain.code.ExerciseToolType;
-import com.example.healthcare.application.exercise.service.dto.CreateSyExerciseDTO;
+import com.example.healthcare.application.exercise.controller.dto.CreateSyExerciseDTO;
 import com.example.healthcare.application.common.domain.Base;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -17,7 +17,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class Exercise extends Base {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "exercise_id")
   private Long id;
 

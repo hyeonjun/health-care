@@ -9,7 +9,9 @@ public enum AuthorityType {
 
   SYSTEM("SYSTEM"),
   COMMON("COMMON"),
-  TRAINER("TRAINER");
+  TRAINER("TRAINER"),
+  GUEST("GUEST");
+  ;
 
   private final String value;
 
@@ -21,6 +23,6 @@ public enum AuthorityType {
     return Arrays.stream(AuthorityType.values())
       .filter(a -> a.name().equals(name))
       .findFirst()
-      .orElse(null);
+      .orElse(GUEST);
   }
 }

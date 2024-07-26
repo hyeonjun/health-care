@@ -2,7 +2,7 @@ package com.example.healthcare.application.account.domain;
 
 import com.example.healthcare.application.account.domain.code.AuthorityType;
 import com.example.healthcare.application.account.domain.code.UserStatus;
-import com.example.healthcare.application.account.service.dto.CreateUserDTO;
+import com.example.healthcare.application.account.controller.dto.CreateUserDTO;
 import com.example.healthcare.application.common.domain.Base;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.jsonwebtoken.Claims;
@@ -30,7 +30,7 @@ import java.util.Objects;
 public class User extends Base {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
   private Long id;
   @Column(name = "email", nullable = false, length = 191, unique = true)
