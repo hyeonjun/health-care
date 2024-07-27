@@ -25,7 +25,7 @@ import java.util.Objects;
 @DynamicUpdate
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE exercise SET is_deleted = true WHERE user_exercise_routine_setting_id = ?")
+@SQLDelete(sql = "UPDATE user_exercise_routine_setting SET is_deleted = true WHERE user_exercise_routine_setting_id = ?")
 public class UserExerciseRoutineSetting extends Base {
 
   @Id
