@@ -34,8 +34,6 @@ public class ExerciseHelper {
   private final ExerciseRepository exerciseRepository;
   private final ExerciseTypeRelationRepository exerciseTypeRelationRepository;
 
-
-
   @Transactional
   public void createExercise(User user, CreateExerciseDTO dto) {
     Exercise exercise = Exercise.createExercise(dto, user);
