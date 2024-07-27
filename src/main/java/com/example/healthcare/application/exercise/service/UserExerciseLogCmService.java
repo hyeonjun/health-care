@@ -23,21 +23,28 @@ import com.example.healthcare.application.exercise.service.data.UserExerciseData
 import com.example.healthcare.application.vo.UserExerciseLogDetailVO;
 import com.example.healthcare.application.vo.UserExerciseLogSummaryVO;
 import com.example.healthcare.application.vo.UserExerciseLogVO;
+import com.example.healthcare.application.vo.UserExerciseRoutineVO;
+import com.example.healthcare.application.vo.UserExerciseSetVO;
 import com.example.healthcare.infra.config.security.user.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserExerciseLogCmService {
+
+  private static final int MAX_PAGE_SIZE = 1000;
 
   private final UserHelper userHelper;
   private final ExerciseHelper exerciseHelper;
@@ -98,8 +105,31 @@ public class UserExerciseLogCmService {
 
   // log calc info + inner (routine + set) info
   public UserExerciseLogDetailVO getExerciseLogDetail(LoginUser loginUser, Long exerciseLogId) {
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
-    return null;
+    UserExerciseLog userExerciseLog = userExerciseLogRepository.findById(exerciseLogId)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    userHelper.checkAuthorization(user, userExerciseLog.getUser());
+
+    if (userExerciseLog.isDeleted()) {
+      throw new ExerciseException(ExerciseExceptionCode.DELETED_EXERCISE_LOG);
+    }
+
+    // get related routine and related set
+    Map<Long, List<UserExerciseSetVO>> routineSetMaps = userExerciseLogRepository.findExerciseSetAllByLog(
+        userExerciseLog, PageRequest.of(0, MAX_PAGE_SIZE))
+      .stream()
+      .collect(Collectors.groupingBy(UserExerciseSetVO::routineId));
+
+    List<UserExerciseRoutineVO> routines = userExerciseLogRepository.findExerciseRoutineAllByLog(
+        userExerciseLog, PageRequest.of(0, MAX_PAGE_SIZE))
+      .stream()
+      .peek(routine -> routine.setExerciseSetList(routineSetMaps.get(routine.getRoutineId())))
+      .toList();
+
+    return UserExerciseLogDetailVO.valueOf(userExerciseLog, routines);
   }
 
   @Transactional

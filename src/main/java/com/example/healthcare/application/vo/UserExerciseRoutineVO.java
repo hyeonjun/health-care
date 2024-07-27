@@ -7,9 +7,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Page;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,7 +27,7 @@ public class UserExerciseRoutineVO {
   private String exerciseName;
   private ExerciseBodyType exerciseBodyType;
   @Setter
-  private Page<UserExerciseSetVO> setList;
+  private List<UserExerciseSetVO> exerciseSetList;
 
   @QueryProjection
   public UserExerciseRoutineVO(Long routineId, Long restTime, Integer order, Integer setCount,

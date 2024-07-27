@@ -7,6 +7,7 @@ import lombok.Builder;
 
 @Builder(access = AccessLevel.PRIVATE)
 public record UserExerciseSetVO(
+  Long routineId,
   Long setId,
   Long setNumber,
   ExerciseSetType exerciseSetType,
@@ -17,7 +18,8 @@ public record UserExerciseSetVO(
 ) {
 
   @QueryProjection
-  public UserExerciseSetVO(Long setId, Long setNumber, ExerciseSetType exerciseSetType, Long weight, Integer reps, Long time, boolean complete) {
+  public UserExerciseSetVO(Long routineId, Long setId, Long setNumber, ExerciseSetType exerciseSetType, Long weight, Integer reps, Long time, boolean complete) {
+    this.routineId = routineId;
     this.setId = setId;
     this.setNumber = setNumber;
     this.exerciseSetType = exerciseSetType;
