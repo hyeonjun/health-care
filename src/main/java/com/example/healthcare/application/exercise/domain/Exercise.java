@@ -71,7 +71,7 @@ public class Exercise extends Base {
   private User createdUser;
 
   public static Exercise createExercise(CreateExerciseDTO dto, User user) {
-    return Exercise.builder()
+    return builder()
       .name(dto.name())
       .description(dto.description())
       .isDeleted(Boolean.FALSE)

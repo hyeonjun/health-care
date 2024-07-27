@@ -3,6 +3,7 @@ package com.example.healthcare.application.exercise.service;
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.account.domain.code.AuthorityType;
 import com.example.healthcare.application.account.domain.code.UserStatus;
+import com.example.healthcare.application.account.helper.UserHelper;
 import com.example.healthcare.application.account.repository.UserRepository;
 import com.example.healthcare.application.common.exception.AuthException;
 import com.example.healthcare.application.common.exception.AuthException.AuthExceptionCode;
@@ -36,10 +37,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ExerciseCmService {
 
+  private final UserHelper userHelper;
+  private final ExerciseHelper exerciseHelper;
   private final ExerciseRepository exerciseRepository;
   private final ExerciseTypeRelationRepository exerciseTypeRelationRepository;
   private final UserRepository userRepository;
-  private final ExerciseHelper exerciseHelper;
 
   @Transactional
   public void createExercise(LoginUser loginUser, CreateExerciseDTO dto) {
@@ -86,7 +88,7 @@ public class ExerciseCmService {
       .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND)); // 2
 
     // 자신이 생성한 운동 종목에 대해서만 삭제 가능
-    exerciseHelper.checkAuthorization(user, exercise.getCreatedUser());
+    userHelper.checkAuthorization(user, exercise.getCreatedUser());
 
     exercise.updateExercise(dto);
     exerciseRepository.save(exercise); // 6
@@ -110,7 +112,7 @@ public class ExerciseCmService {
       .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
     // 자신이 생성한 운동 종목에 대해서만 삭제 가능
-    exerciseHelper.checkAuthorization(user, exercise.getCreatedUser());
+    userHelper.checkAuthorization(user, exercise.getCreatedUser());
 
     // soft delete 로 관련 relation 은 제거하지 않음
     exerciseRepository.deleteById(exercise.getId());

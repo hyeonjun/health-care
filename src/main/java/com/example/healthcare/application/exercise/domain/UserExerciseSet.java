@@ -1,19 +1,37 @@
 package com.example.healthcare.application.exercise.domain;
 
+import com.example.healthcare.application.common.domain.Base;
+import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseSetDTO;
 import com.example.healthcare.application.exercise.domain.code.ExerciseSetType;
-import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.Objects;
 
 @Entity
 @DynamicUpdate
 @Getter
+@Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserExerciseSet {
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class UserExerciseSet extends Base {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +44,7 @@ public class UserExerciseSet {
   @Column(name = "exercise_set_type", length = 191)
   private ExerciseSetType exerciseSetType;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(name = "weight_unit_type", length = 191)
-  private WeightUnitType weightUnitType;
-  private Long wight;
+  private Long weight;
   private Integer reps;
   private Long time;
 
@@ -40,4 +55,46 @@ public class UserExerciseSet {
   @JsonBackReference
   private UserExerciseRoutine userExerciseRoutine;
 
+  public static UserExerciseSet createSet(CreateUserExerciseSetDTO dto) {
+    return builder()
+      .setNumber(dto.serNumber())
+      .exerciseSetType(dto.exerciseSetType())
+      .weight(dto.weight())
+      .reps(dto.reps())
+      .time(dto.time())
+      .complete(dto.complete())
+      .build();
+  }
+
+  public void applyRoutine(UserExerciseRoutine routine) {
+    this.userExerciseRoutine = routine;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof UserExerciseSet that)) return false;
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
+  }
+
+  @Override
+  public String toString() {
+    return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+      .append("id", id)
+      .append("setNumber", setNumber)
+      .append("exerciseSetType", exerciseSetType)
+      .append("weight", weight)
+      .append("reps", reps)
+      .append("time", time)
+      .append("complete", complete)
+      .append("userExerciseRoutine", userExerciseRoutine)
+      .append("createdDateTime", createdDateTime)
+      .append("updatedDateTime", updatedDateTime)
+      .toString();
+  }
 }

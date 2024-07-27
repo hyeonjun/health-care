@@ -43,39 +43,64 @@ create table user
 
 create table user_exercise_log
 (
+    exercise_count       integer,
     exercise_date        date   not null,
+    is_deleted           bit    not null,
+    total_reps           decimal(38, 0),
+    total_set_count      decimal(38, 0),
+    total_time           decimal(38, 0),
+    total_weight         decimal(38, 0),
     created_date_time    datetime(6),
-    end_date_time        datetime(6),
-    start_date_time      datetime(6),
+    exercise_time        bigint,
     updated_date_time    datetime(6),
     user_exercise_log_id bigint not null auto_increment,
     user_id              bigint not null,
-    exercise_time_type   enum ('DAY','EVENING','NIGHT'),
+    exercise_time_type   enum ('AM','DEFAULT','PM'),
     primary key (user_exercise_log_id)
 ) engine = InnoDB;
 
 create table user_exercise_routine
 (
+    order_number             integer,
+    set_count                integer,
+    sum_reps                 decimal(38, 0),
+    sum_time                 decimal(38, 0),
+    sum_weight               decimal(38, 0),
     created_date_time        datetime(6),
     exercise_id              bigint not null,
     rest_time                bigint,
     updated_date_time        datetime(6),
     user_exercise_log_id     bigint not null,
     user_exercise_routine_id bigint not null auto_increment,
+    weight_unit_type         enum ('KILOGRAM','POUND'),
     primary key (user_exercise_routine_id)
+) engine = InnoDB;
+
+create table user_exercise_routine_setting
+(
+    is_deleted                       bit    not null,
+    created_date_time                datetime(6),
+    exercise_id                      bigint not null,
+    rest_time                        bigint,
+    updated_date_time                datetime(6),
+    user_exercise_routine_setting_id bigint not null auto_increment,
+    user_id                          bigint not null,
+    setting_name                     varchar(255),
+    primary key (user_exercise_routine_setting_id)
 ) engine = InnoDB;
 
 create table user_exercise_set
 (
     complete                 bit    not null,
     reps                     integer,
+    created_date_time        datetime(6),
     set_number               bigint not null,
     time                     bigint,
+    updated_date_time        datetime(6),
     user_exercise_routine_id bigint not null,
     user_exercise_set_id     bigint not null auto_increment,
-    wight                    bigint,
+    weight                   bigint,
     exercise_set_type        enum ('DEFAULT','DROP','FAIL','WARMUP'),
-    weight_unit_type         enum ('KILOGRAM','POUND'),
     primary key (user_exercise_set_id)
 ) engine = InnoDB;
 
@@ -85,8 +110,14 @@ create index IDX55r3luukc7oe20q88depist0m
 alter table user
     add constraint UKob8kqyqqgmefl0aco34akdtpe unique (email);
 
+create index IDXgfy7rlvi2dlyw3v0d35c0o43l
+    on user_exercise_log (exercise_date, user_id);
+
 alter table user_exercise_log
     add constraint UKr62lumhns2g80n4miymds7bhq unique (exercise_date, exercise_time_type, user_id);
+
+alter table user_exercise_routine
+    add constraint UKqkitc82mjt5xtd6arnk332xm5 unique (user_exercise_routine_id, order_number);
 
 alter table exercise
     add constraint FK5v547fhplc6po1fgoeqk1dl9f
@@ -113,7 +144,21 @@ alter table user_exercise_routine
         foreign key (user_exercise_log_id)
             references user_exercise_log (user_exercise_log_id);
 
+alter table user_exercise_routine_setting
+    add constraint FKcsmcg11m1p94mr9c06vusl2xl
+        foreign key (exercise_id)
+            references exercise (exercise_id);
+
+alter table user_exercise_routine_setting
+    add constraint FKo7s09gsp3h4ebatyaw68rda3o
+        foreign key (user_id)
+            references user (user_id);
+
 alter table user_exercise_set
     add constraint FK2v43r77b177fmbajroxfgn6la
         foreign key (user_exercise_routine_id)
             references user_exercise_routine (user_exercise_routine_id);
+
+-- 2024.07.28
+alter table user_exercise_routine
+    add column is_deleted bit not null;

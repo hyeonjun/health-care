@@ -9,6 +9,8 @@ public class DuplicateException extends CommonException {
   public enum DuplicateExceptionCode implements ResponseCode {
     DUPLICATE("DPE-001", "duplicate"),
     DUPLICATE_EMAIL("DPE-002", "email duplicate"),
+    DUPLICATE_ROUTINE_ORDER("DPE-003", "routine order duplicate"),
+    DUPLICATE_SET_NUMBER("DPE-004", "set number duplicate"),
     ;
 
     private final String code;

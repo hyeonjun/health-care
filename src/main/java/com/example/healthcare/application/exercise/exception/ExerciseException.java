@@ -11,6 +11,7 @@ public class ExerciseException extends CommonException {
     INVALID_EXERCISE("EEC-001", "invalid exercise"),
     NOT_FOUND_RELATION_EXERCISE_TYPE("EEC-002", "relation exercise type not found"),
     DELETED_EXERCISE("EEC-003", "deleted exercise"),
+    DELETED_EXERCISE_LOG("EEC-004", "deleted user exercise log"),
     ;
 
     private final String code;
