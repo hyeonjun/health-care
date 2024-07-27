@@ -20,7 +20,7 @@ public class UserExerciseData {
 
     public void update(UserExerciseRoutineData routineData) {
       exerciseCount++;
-      totalSetCount = CalculatorUtil.add(totalSetCount, BigInteger.valueOf(routineData.setCount));
+      totalSetCount = CalculatorUtil.add(totalSetCount, routineData.setCount);
       totalWeight = CalculatorUtil.add(totalWeight, routineData.sumWeight);
       totalReps = CalculatorUtil.add(totalReps, routineData.sumReps);
       totalTime = CalculatorUtil.add(totalTime, routineData.sumTime);
@@ -35,9 +35,9 @@ public class UserExerciseData {
 
     public void update(CreateUserExerciseSetDTO setDTO) {
       setCount++;
-      sumWeight = CalculatorUtil.add(sumWeight, BigInteger.valueOf(setDTO.weight()));
-      sumReps = CalculatorUtil.add(sumReps, BigInteger.valueOf(setDTO.reps()));
-      sumTime = CalculatorUtil.add(sumTime, BigInteger.valueOf(setDTO.time()));
+      sumWeight = CalculatorUtil.add(sumWeight, setDTO.weight());
+      sumReps = CalculatorUtil.add(sumReps, setDTO.reps());
+      sumTime = CalculatorUtil.add(sumTime, setDTO.time());
     }
   }
 
