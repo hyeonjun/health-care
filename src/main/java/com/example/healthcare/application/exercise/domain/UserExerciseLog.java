@@ -8,10 +8,13 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @DynamicUpdate
@@ -20,7 +23,8 @@ import java.time.LocalDateTime;
 @Table(name = "user_exercise_log",
   uniqueConstraints = {
     @UniqueConstraint(columnNames = {"exercise_date", "exercise_time_type", "user_id"})
-  }
+  },
+  indexes = {@Index(columnList = "exercise_date, user_id")}
 )
 public class UserExerciseLog extends Base {
 
@@ -31,6 +35,7 @@ public class UserExerciseLog extends Base {
 
   private LocalDateTime startDateTime;
   private LocalDateTime endDateTime;
+  private Integer totalVolume;
 
   @Column(name = "exercise_date", nullable = false)
   private LocalDate exerciseDate;
@@ -43,4 +48,30 @@ public class UserExerciseLog extends Base {
   @JsonBackReference
   private User user;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof UserExerciseLog that)) return false;
+    return Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getId());
+  }
+
+  @Override
+  public String toString() {
+    return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
+      .append("id", id)
+      .append("startDateTime", startDateTime)
+      .append("endDateTime", endDateTime)
+      .append("totalVolume", totalVolume)
+      .append("exerciseDate", exerciseDate)
+      .append("exerciseTimeType", exerciseTimeType)
+      .append("user", user)
+      .append("createdDateTime", createdDateTime)
+      .append("updatedDateTime", updatedDateTime)
+      .toString();
+  }
 }
