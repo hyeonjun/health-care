@@ -1,8 +1,6 @@
 package com.example.healthcare.application.exercise.helper;
 
 import com.example.healthcare.application.account.domain.User;
-import com.example.healthcare.application.common.exception.AuthException;
-import com.example.healthcare.application.common.exception.AuthException.AuthExceptionCode;
 import com.example.healthcare.application.common.exception.InvalidInputValueException;
 import com.example.healthcare.application.common.exception.InvalidInputValueException.InvalidInputValueExceptionCode;
 import com.example.healthcare.application.common.exception.ResourceException;
@@ -36,11 +34,7 @@ public class ExerciseHelper {
   private final ExerciseRepository exerciseRepository;
   private final ExerciseTypeRelationRepository exerciseTypeRelationRepository;
 
-  public void checkAuthorization(User loginUser, User resourceUser) {
-    if (!loginUser.equals(resourceUser)) {
-      throw new AuthException(AuthExceptionCode.NOT_AUTHORIZED);
-    }
-  }
+
 
   @Transactional
   public void createExercise(User user, CreateExerciseDTO dto) {
