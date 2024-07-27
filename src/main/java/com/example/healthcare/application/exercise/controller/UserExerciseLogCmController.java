@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/cm/exercise-logs")
-public class UserExerciseLogController {
+public class UserExerciseLogCmController {
 
   private final UserExerciseLogCmService userExerciseLogCmService;
 
