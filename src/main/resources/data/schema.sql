@@ -43,27 +43,36 @@ create table user
 
 create table user_exercise_log
 (
+    exercise_count       integer,
     exercise_date        date   not null,
-    total_volume         integer,
+    is_deleted           bit    not null,
+    total_reps           decimal(38, 0),
+    total_set_count      decimal(38, 0),
+    total_time           decimal(38, 0),
+    total_weight         decimal(38, 0),
     created_date_time    datetime(6),
-    end_date_time        datetime(6),
-    start_date_time      datetime(6),
+    exercise_time        bigint,
     updated_date_time    datetime(6),
     user_exercise_log_id bigint not null auto_increment,
     user_id              bigint not null,
-    exercise_time_type   enum ('DAY','EVENING','NIGHT'),
+    exercise_time_type   enum ('AM','DEFAULT','PM'),
     primary key (user_exercise_log_id)
 ) engine = InnoDB;
 
 create table user_exercise_routine
 (
-    volume                   integer,
+    order_number             integer,
+    set_count                integer,
+    sum_reps                 decimal(38, 0),
+    sum_time                 decimal(38, 0),
+    sum_weight               decimal(38, 0),
     created_date_time        datetime(6),
     exercise_id              bigint not null,
     rest_time                bigint,
     updated_date_time        datetime(6),
     user_exercise_log_id     bigint not null,
     user_exercise_routine_id bigint not null auto_increment,
+    weight_unit_type         enum ('KILOGRAM','POUND'),
     primary key (user_exercise_routine_id)
 ) engine = InnoDB;
 
@@ -90,9 +99,8 @@ create table user_exercise_set
     updated_date_time        datetime(6),
     user_exercise_routine_id bigint not null,
     user_exercise_set_id     bigint not null auto_increment,
-    wight                    bigint,
+    weight                   bigint,
     exercise_set_type        enum ('DEFAULT','DROP','FAIL','WARMUP'),
-    weight_unit_type         enum ('KILOGRAM','POUND'),
     primary key (user_exercise_set_id)
 ) engine = InnoDB;
 
@@ -107,6 +115,9 @@ create index IDXgfy7rlvi2dlyw3v0d35c0o43l
 
 alter table user_exercise_log
     add constraint UKr62lumhns2g80n4miymds7bhq unique (exercise_date, exercise_time_type, user_id);
+
+alter table user_exercise_routine
+    add constraint UKqkitc82mjt5xtd6arnk332xm5 unique (user_exercise_routine_id, order_number);
 
 alter table exercise
     add constraint FK5v547fhplc6po1fgoeqk1dl9f

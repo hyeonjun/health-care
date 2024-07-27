@@ -2,7 +2,6 @@ package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.common.domain.Base;
 import com.example.healthcare.application.exercise.domain.code.ExerciseSetType;
-import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,10 +39,7 @@ public class UserExerciseSet extends Base {
   @Column(name = "exercise_set_type", length = 191)
   private ExerciseSetType exerciseSetType;
 
-  @Enumerated(value = EnumType.STRING)
-  @Column(name = "weight_unit_type", length = 191)
-  private WeightUnitType weightUnitType;
-  private Long wight;
+  private Long weight;
   private Integer reps;
   private Long time;
 
@@ -72,8 +68,7 @@ public class UserExerciseSet extends Base {
       .append("id", id)
       .append("setNumber", setNumber)
       .append("exerciseSetType", exerciseSetType)
-      .append("weightUnitType", weightUnitType)
-      .append("wight", wight)
+      .append("weight", weight)
       .append("reps", reps)
       .append("time", time)
       .append("complete", complete)

@@ -7,9 +7,9 @@ import lombok.Getter;
 @Getter
 public enum ExerciseTimeType {
 
-  DAY("07:00 ~ 15:00"),
-  EVENING("15:00 ~ 23:00"),
-  NIGHT("23:00 ~ 07:00")
+  AM("오전"),
+  PM("오후"),
+  DEFAULT("default")
   ;
 
   private final String description;

@@ -1,8 +1,20 @@
 package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.common.domain.Base;
+import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,12 +22,18 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 @Entity
 @DynamicUpdate
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user_exercise_routine",
+  uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_exercise_routine_id", "order_number"})
+  }
+)
 public class UserExerciseRoutine extends Base {
 
   @Id
@@ -24,7 +42,19 @@ public class UserExerciseRoutine extends Base {
   private Long id;
 
   private Long restTime;
-  private Integer volume;
+  @Column(name = "order_number")
+  private Integer order;
+
+  // 운동 수행 데이터
+  private Integer setCount;
+  private BigInteger sumWeight;
+  private BigInteger sumReps;
+  private BigInteger sumTime;
+
+
+  @Enumerated(value = EnumType.STRING)
+  @Column(name = "weight_unit_type", length = 191)
+  private WeightUnitType weightUnitType = WeightUnitType.KILOGRAM;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_exercise_log_id", nullable = false, referencedColumnName = "user_exercise_log_id")
@@ -52,7 +82,12 @@ public class UserExerciseRoutine extends Base {
     return new ToStringBuilder(this, ToStringStyle.JSON_STYLE)
       .append("id", id)
       .append("restTime", restTime)
-      .append("volume", volume)
+      .append("setCount", setCount)
+      .append("order", order)
+      .append("sumWeight", sumWeight)
+      .append("sumReps", sumReps)
+      .append("sumTime", sumTime)
+      .append("weightUnitType", weightUnitType)
       .append("userExerciseLog", userExerciseLog)
       .append("exercise", exercise)
       .append("createdDateTime", createdDateTime)
