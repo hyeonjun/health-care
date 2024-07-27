@@ -2,6 +2,7 @@ package com.example.healthcare.application.exercise.service.data;
 
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseSetDTO;
 import com.example.healthcare.application.exercise.domain.UserExerciseSet;
+import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import com.example.healthcare.util.CalculatorUtil;
 
 import java.math.BigInteger;
@@ -33,9 +34,19 @@ public class UserExerciseData {
     public BigInteger sumReps = null;
     public BigInteger sumTime = null;
 
-    public void update(CreateUserExerciseSetDTO setDTO) {
+    public void update(CreateUserExerciseSetDTO setDTO, WeightUnitType weightUnitType) {
       setCount++;
-      sumWeight = CalculatorUtil.add(sumWeight, setDTO.weight());
+
+      Long weight = setDTO.weight();
+      if (WeightUnitType.POUND.equals(weightUnitType)) {
+        weight = (long) Math.round(WeightUnitType.lbsToKg(setDTO.weight()));
+      }
+
+      if (setDTO.reps() != null) {
+        weight *= setDTO.reps();
+      }
+
+      sumWeight = CalculatorUtil.add(sumWeight, weight);
       sumReps = CalculatorUtil.add(sumReps, setDTO.reps());
       sumTime = CalculatorUtil.add(sumTime, setDTO.time());
     }
