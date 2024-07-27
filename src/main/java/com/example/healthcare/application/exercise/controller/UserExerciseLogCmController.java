@@ -4,6 +4,7 @@ import com.example.healthcare.application.common.response.CommonResponse;
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseLogDTO;
 import com.example.healthcare.application.exercise.controller.dto.UpdateUserExerciseLogDTO;
 import com.example.healthcare.application.exercise.service.UserExerciseLogCmService;
+import com.example.healthcare.application.vo.UserExerciseLogDetailVO;
 import com.example.healthcare.application.vo.UserExerciseLogSummaryVO;
 import com.example.healthcare.application.vo.UserExerciseLogVO;
 import com.example.healthcare.infra.config.security.user.LoginUser;
@@ -54,9 +55,9 @@ public class UserExerciseLogCmController {
 
   // 운동 기록 상세 조회
   @GetMapping("/{exercise-log-id}")
-  public CommonResponse<Void> getExerciseLogDetail(@AuthenticationPrincipal LoginUser loginUser,
+  public CommonResponse<UserExerciseLogDetailVO> getExerciseLogDetail(@AuthenticationPrincipal LoginUser loginUser,
     @PathVariable(value = "exercise-log-id") Long exerciseLogId) {
-    return CommonResponse.success();
+    return CommonResponse.success(userExerciseLogCmService.getExerciseLogDetail(loginUser, exerciseLogId));
   }
 
   // 운동 기록 편집 (생성DTO+각 id를 받아 전체 수정)
@@ -64,6 +65,7 @@ public class UserExerciseLogCmController {
   public CommonResponse<Void> updateExerciseLog(@AuthenticationPrincipal LoginUser loginUser,
     @PathVariable(value = "exercise-log-id") Long exerciseLogId,
     @Valid @RequestBody UpdateUserExerciseLogDTO dto) {
+    userExerciseLogCmService.updateExerciseLog(loginUser, exerciseLogId, dto);
     return CommonResponse.success();
   }
 
@@ -71,6 +73,7 @@ public class UserExerciseLogCmController {
   @DeleteMapping("/{exercise-log-id}")
   public CommonResponse<Void> deleteExerciseLog(@AuthenticationPrincipal LoginUser loginUser,
     @PathVariable(value = "exercise-log-id") Long exerciseLogId) {
+    userExerciseLogCmService.deleteExerciseLog(loginUser, exerciseLogId);
     return CommonResponse.success();
   }
 }
