@@ -1,7 +1,9 @@
 package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.common.domain.Base;
+import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
 import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
+import com.example.healthcare.application.exercise.service.data.UserExerciseData.UserExerciseRoutineData;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +18,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -28,12 +32,14 @@ import java.util.Objects;
 @Entity
 @DynamicUpdate
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_exercise_routine",
   uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_exercise_routine_id", "order_number"})
   }
 )
+@Builder(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserExerciseRoutine extends Base {
 
   @Id
@@ -64,6 +70,24 @@ public class UserExerciseRoutine extends Base {
   @JoinColumn(name = "exercise_id", nullable = false, referencedColumnName = "exercise_id")
   @JsonBackReference
   private Exercise exercise;
+
+  public static UserExerciseRoutine createRoutine(CreateUserExerciseRoutineDTO dto,
+    UserExerciseRoutineData routineData, Exercise exercise) {
+    return builder()
+      .restTime(dto.restTime())
+      .order(dto.order())
+      .setCount(routineData.setCount)
+      .sumWeight(routineData.sumWeight)
+      .sumReps(routineData.sumReps)
+      .sumTime(routineData.sumTime)
+      .weightUnitType(dto.weightUnitType() != null ? dto.weightUnitType() : WeightUnitType.KILOGRAM)
+      .exercise(exercise)
+      .build();
+  }
+
+  public void applyLog(UserExerciseLog userExerciseLog) {
+    this.userExerciseLog = userExerciseLog;
+  }
 
   @Override
   public boolean equals(Object o) {

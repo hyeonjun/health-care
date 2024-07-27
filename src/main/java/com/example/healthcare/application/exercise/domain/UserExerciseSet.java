@@ -1,6 +1,7 @@
 package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.common.domain.Base;
+import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseSetDTO;
 import com.example.healthcare.application.exercise.domain.code.ExerciseSetType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
@@ -14,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -25,7 +28,9 @@ import java.util.Objects;
 @Entity
 @DynamicUpdate
 @Getter
+@Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserExerciseSet extends Base {
 
   @Id
@@ -49,6 +54,21 @@ public class UserExerciseSet extends Base {
   @JoinColumn(name = "user_exercise_routine_id", nullable = false, referencedColumnName = "user_exercise_routine_id")
   @JsonBackReference
   private UserExerciseRoutine userExerciseRoutine;
+
+  public static UserExerciseSet createSet(CreateUserExerciseSetDTO dto) {
+    return builder()
+      .setNumber(dto.serNumber())
+      .exerciseSetType(dto.exerciseSetType())
+      .weight(dto.weight())
+      .reps(dto.reps())
+      .time(dto.time())
+      .complete(dto.complete())
+      .build();
+  }
+
+  public void applyRoutine(UserExerciseRoutine routine) {
+    this.userExerciseRoutine = routine;
+  }
 
   @Override
   public boolean equals(Object o) {
