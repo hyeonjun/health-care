@@ -4,6 +4,7 @@ import com.example.healthcare.application.common.exception.InvalidInputValueExce
 import com.example.healthcare.application.common.exception.InvalidInputValueException.InvalidInputValueExceptionCode;
 import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 public record CreateUserExerciseRoutineDTO(
   @NotNull Long restTime, // second 단위, 최대 11분 -> 60 * 11
-  Integer order,
+  @Min(1) Integer order,
   WeightUnitType weightUnitType,
   @NotNull Long exerciseId,
 
