@@ -17,7 +17,7 @@ spring:
     generate-ddl: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/healthCare?rewriteBatchedStatements=true&profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999
+    url: jdbc:mysql://127.0.0.1:3306/healthCare?serverTimezone=UTC&useUnicode=true&useSSL=false&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true # &profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999
     username: root
     password: 1234
     hikari:
@@ -38,3 +38,7 @@ jwt:
       expiration_time: 600000
     refresh:
       expiration_time: 1800000
+
+logging:
+  level:
+    p6spy: info
