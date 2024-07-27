@@ -30,7 +30,7 @@ public class UserExerciseLogCmController {
 
   @PostMapping
   public CommonResponse<Void> createExerciseLog(@AuthenticationPrincipal LoginUser loginUser,
-     @Valid @RequestBody CreateUserExerciseLogDTO dto) {
+    @Valid @RequestBody CreateUserExerciseLogDTO dto) {
     userExerciseLogCmService.createExerciseLog(loginUser, dto);
     return CommonResponse.success();
   }
