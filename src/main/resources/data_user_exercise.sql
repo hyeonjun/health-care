@@ -4,17 +4,17 @@ insert into user_exercise_log (created_date_time, exercise_count, exercise_date,
 values ('2024-07-28T00:17:42.167+0900', 3, '2024-07-28T00:00:00.000+0900', 5400, 'DEFAULT', false, 130, 11, NULL, 476,
         '2024-07-28T00:17:42.167+0900', 2);
 
-insert into user_exercise_routine (created_date_time, exercise_id, order_number, rest_time, set_count, sum_reps,
+insert into user_exercise_routine (created_date_time, exercise_id, is_deleted, order_number, rest_time, set_count, sum_reps,
                                     sum_time, sum_weight, updated_date_time, user_exercise_log_id, weight_unit_type)
-values ('2024-07-28T00:17:42.181+0900', 1, 1, 90, 4, 44, NULL, 230, '2024-07-28T00:17:42.181+0900', 1, 'KILOGRAM');
+values ('2024-07-28T00:17:42.181+0900', 1, false, 1, 90, 4, 44, NULL, 230, '2024-07-28T00:17:42.181+0900', 1, 'KILOGRAM');
 
-insert into user_exercise_routine (created_date_time, exercise_id, order_number, rest_time, set_count, sum_reps,
+insert into user_exercise_routine (created_date_time, exercise_id, is_deleted, order_number, rest_time, set_count, sum_reps,
                                     sum_time, sum_weight, updated_date_time, user_exercise_log_id, weight_unit_type)
-values ('2024-07-28T00:17:42.184+0900', 5, 2, 80, 4, 46, NULL, 180, '2024-07-28T00:17:42.184+0900', 1, 'KILOGRAM');
+values ('2024-07-28T00:17:42.184+0900', 5, false, 2, 80, 4, 46, NULL, 180, '2024-07-28T00:17:42.184+0900', 1, 'KILOGRAM');
 
-insert into user_exercise_routine (created_date_time, exercise_id, order_number, rest_time, set_count, sum_reps,
+insert into user_exercise_routine (created_date_time, exercise_id, is_deleted, order_number, rest_time, set_count, sum_reps,
                                     sum_time, sum_weight, updated_date_time, user_exercise_log_id, weight_unit_type)
-values ('2024-07-28T00:17:42.186+0900', 4, 3, 70, 3, 40, NULL, 66, '2024-07-28T00:17:42.186+0900', 1, 'KILOGRAM');
+values ('2024-07-28T00:17:42.186+0900', 4, false, 3, 70, 3, 40, NULL, 66, '2024-07-28T00:17:42.186+0900', 1, 'KILOGRAM');
 
 insert into user_exercise_set (complete, created_date_time, exercise_set_type, reps, set_number, time,
                                 updated_date_time, user_exercise_routine_id, weight)

@@ -158,3 +158,7 @@ alter table user_exercise_set
     add constraint FK2v43r77b177fmbajroxfgn6la
         foreign key (user_exercise_routine_id)
             references user_exercise_routine (user_exercise_routine_id);
+
+-- 2024.07.28
+alter table user_exercise_routine
+    add column is_deleted bit not null;

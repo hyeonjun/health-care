@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SQLDelete;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -37,6 +38,7 @@ import java.util.Objects;
     @UniqueConstraint(columnNames = {"user_exercise_routine_id", "order_number"})
   }
 )
+@SQLDelete(sql = "UPDATE user_exercise_routine SET is_deleted = true where user_exercise_routine_id = ?")
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,6 +48,8 @@ public class UserExerciseRoutine extends Base {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_exercise_routine_id")
   private Long id;
+
+  private boolean isDeleted;
 
   private Long restTime;
   @Column(name = "order_number")
@@ -74,6 +78,7 @@ public class UserExerciseRoutine extends Base {
   public static UserExerciseRoutine createRoutine(CreateUserExerciseRoutineDTO dto,
     UserExerciseRoutineData routineData, Exercise exercise) {
     return builder()
+      .isDeleted(false)
       .restTime(dto.restTime())
       .order(dto.order())
       .setCount(routineData.setCount)
