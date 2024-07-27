@@ -1,6 +1,8 @@
 package com.example.healthcare.application.exercise.helper;
 
 import com.example.healthcare.application.account.domain.User;
+import com.example.healthcare.application.common.exception.DuplicateException;
+import com.example.healthcare.application.common.exception.DuplicateException.DuplicateExceptionCode;
 import com.example.healthcare.application.common.exception.InvalidInputValueException;
 import com.example.healthcare.application.common.exception.InvalidInputValueException.InvalidInputValueExceptionCode;
 import com.example.healthcare.application.common.exception.ResourceException;
@@ -25,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -64,11 +68,17 @@ public class ExerciseHelper {
     UserExerciseRoutineData routineData = new UserExerciseRoutineData();
 
     int totalSetSize = dto.setDTOList().size();
+    Set<Long> setNumberMemo = new HashSet<>();
     List<UserExerciseSet> setList = dto.setDTOList().stream()
       .map(setDTO -> {
         if (setDTO.serNumber() > totalSetSize) {
           throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
         }
+
+        if (setNumberMemo.contains(setDTO.serNumber())) {
+          throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_SET_NUMBER);
+        }
+        setNumberMemo.add(setDTO.serNumber());
 
         UserExerciseSet setEntity = UserExerciseSet.createSet(setDTO);
         routineData.update(setDTO);

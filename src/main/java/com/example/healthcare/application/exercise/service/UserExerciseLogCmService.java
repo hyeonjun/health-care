@@ -2,17 +2,18 @@ package com.example.healthcare.application.exercise.service;
 
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.account.domain.code.UserStatus;
+import com.example.healthcare.application.account.helper.UserHelper;
 import com.example.healthcare.application.account.repository.UserRepository;
+import com.example.healthcare.application.common.exception.DuplicateException;
+import com.example.healthcare.application.common.exception.DuplicateException.DuplicateExceptionCode;
 import com.example.healthcare.application.common.exception.ResourceException;
 import com.example.healthcare.application.common.exception.ResourceException.ResourceExceptionCode;
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseLogDTO;
-import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
-import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseSetDTO;
 import com.example.healthcare.application.exercise.controller.dto.UpdateUserExerciseLogDTO;
-import com.example.healthcare.application.exercise.domain.Exercise;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
 import com.example.healthcare.application.exercise.domain.UserExerciseRoutine;
-import com.example.healthcare.application.exercise.domain.UserExerciseSet;
+import com.example.healthcare.application.exercise.exception.ExerciseException;
+import com.example.healthcare.application.exercise.exception.ExerciseException.ExerciseExceptionCode;
 import com.example.healthcare.application.exercise.helper.ExerciseHelper;
 import com.example.healthcare.application.exercise.repository.ExerciseRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseLogRepository;
@@ -29,14 +30,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserExerciseLogCmService {
 
+  private final UserHelper userHelper;
   private final ExerciseHelper exerciseHelper;
   private final UserRepository userRepository;
   private final ExerciseRepository exerciseRepository;
@@ -59,9 +62,17 @@ public class UserExerciseLogCmService {
     UserExerciseLogData logData = new UserExerciseLogData();
 
     int routineSize = dto.routineDTOList().size();
+    Set<Integer> routineOrderMemo = new HashSet<>();
     List<UserExerciseRoutine> routineEntityList = dto.routineDTOList()
       .stream()
-      .map(routineDTO -> exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, routineSize, logData))
+      .map(routineDTO -> {
+        if (routineDTO.order() != null && routineOrderMemo.contains(routineDTO.order())) {
+          throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_ROUTINE_ORDER);
+        }
+        routineOrderMemo.add(routineDTO.order());
+
+        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, routineSize, logData);
+      })
       .toList();
 
     // 운동 기록(log)
