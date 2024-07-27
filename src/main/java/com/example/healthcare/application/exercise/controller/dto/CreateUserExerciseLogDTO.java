@@ -15,6 +15,6 @@ public record CreateUserExerciseLogDTO(
   @NotNull Long exerciseTime,
   @NotNull @DateTimeFormat(iso = ISO.DATE) LocalDate exerciseDate,
   @NotNull ExerciseTimeType exerciseTimeType,
-  @Valid @Size(max = 1000) List<CreateUserExerciseRoutineDTO> createUserExerciseRoutineDTOS
+  @Valid @Size(max = 1000) List<CreateUserExerciseRoutineDTO> routineDTOList
   ) {
 }

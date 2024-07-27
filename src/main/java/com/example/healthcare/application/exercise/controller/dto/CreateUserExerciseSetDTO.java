@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record CreateUserExerciseSetDTO(
   @NotNull Long serNumber,
-  ExerciseSetType exerciseSetType,
+  @NotNull ExerciseSetType exerciseSetType,
   Long weight,
   Integer reps,
   Long time,
