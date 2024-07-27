@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -65,12 +66,21 @@ public class ExerciseHelper {
     Exercise exercise = exerciseRepository.findById(dto.exerciseId())
       .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
+    Set<ExerciseType> exerciseTypes = exerciseTypeRelationRepository.findAllByExercise(exercise)
+      .stream()
+      .map(ExerciseTypeRelation::getExerciseType)
+      .collect(Collectors.toSet());
+    if (CollectionUtils.isEmpty(exerciseTypes)) {
+      throw new ExerciseException(ExerciseExceptionCode.NOT_FOUND_RELATION_EXERCISE_TYPE);
+    }
+
     UserExerciseRoutineData routineData = new UserExerciseRoutineData();
 
     int totalSetSize = dto.setDTOList().size();
     Set<Long> setNumberMemo = new HashSet<>();
     List<UserExerciseSet> setList = dto.setDTOList().stream()
       .map(setDTO -> {
+        // setNumber validation
         if (setDTO.serNumber() > totalSetSize) {
           throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
         }
@@ -80,8 +90,24 @@ public class ExerciseHelper {
         }
         setNumberMemo.add(setDTO.serNumber());
 
+        // exerciseType validation
+        if ((exerciseTypes.contains(ExerciseType.WEIGHT) && setDTO.weight() == null)
+          || (!exerciseTypes.contains(ExerciseType.WEIGHT) && setDTO.weight() != null)) {
+          throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
+        }
+
+        if (exerciseTypes.contains(ExerciseType.REPS) && setDTO.reps() == null
+          || (!exerciseTypes.contains(ExerciseType.REPS) && setDTO.reps() != null)) {
+          throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
+        }
+
+        if (exerciseTypes.contains(ExerciseType.TIME) && setDTO.time() == null
+          || (!exerciseTypes.contains(ExerciseType.TIME) && setDTO.time() != null)) {
+          throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
+        }
+
         UserExerciseSet setEntity = UserExerciseSet.createSet(setDTO);
-        routineData.update(setDTO);
+        routineData.update(setDTO, dto.weightUnitType());
         return setEntity;
       }).toList();
 
