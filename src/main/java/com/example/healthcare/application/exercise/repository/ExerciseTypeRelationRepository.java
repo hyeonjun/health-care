@@ -8,11 +8,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ExerciseTypeRelationRepository extends JpaRepository<ExerciseTypeRelation, Long> {
 
   List<ExerciseTypeRelation> findAllByExercise(Exercise exercise);
+  List<ExerciseTypeRelation> findAllByExerciseIdIn(Collection<Long> ids);
 
   @Transactional
   @Modifying

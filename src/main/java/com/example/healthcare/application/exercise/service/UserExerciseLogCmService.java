@@ -14,12 +14,15 @@ import com.example.healthcare.application.exercise.controller.dto.CreateUserExer
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
 import com.example.healthcare.application.exercise.controller.dto.UpdateUserExerciseLogDTO;
 import com.example.healthcare.application.exercise.domain.Exercise;
+import com.example.healthcare.application.exercise.domain.ExerciseTypeRelation;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
 import com.example.healthcare.application.exercise.domain.UserExerciseRoutine;
+import com.example.healthcare.application.exercise.domain.code.ExerciseType;
 import com.example.healthcare.application.exercise.exception.ExerciseException;
 import com.example.healthcare.application.exercise.exception.ExerciseException.ExerciseExceptionCode;
 import com.example.healthcare.application.exercise.helper.ExerciseHelper;
 import com.example.healthcare.application.exercise.repository.ExerciseRepository;
+import com.example.healthcare.application.exercise.repository.ExerciseTypeRelationRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseLogRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseRoutineRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseSetRepository;
@@ -36,9 +39,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,7 @@ public class UserExerciseLogCmService {
   private final ExerciseHelper exerciseHelper;
   private final UserRepository userRepository;
   private final ExerciseRepository exerciseRepository;
+  private final ExerciseTypeRelationRepository exerciseTypeRelationRepository;
   private final UserExerciseLogRepository userExerciseLogRepository;
   private final UserExerciseRoutineRepository userExerciseRoutineRepository;
   private final UserExerciseSetRepository userExerciseSetRepository;
@@ -72,17 +76,22 @@ public class UserExerciseLogCmService {
     BigInteger totalTime = null;
 
     // 운동 종록(routine) + 운동 세트(set)
-    UserExerciseLogData logData = new UserExerciseLogData();
-
     List<Long> exerciseIds = dto.routineDTOList().stream()
       .map(CreateUserExerciseRoutineDTO::exerciseId)
       .toList();
     Map<Long, Exercise> exercises = exerciseRepository.findAllByIdIn(exerciseIds)
       .stream().collect(Collectors.toMap(Exercise::getId, exercise -> exercise));
     // 각 exercise 관련 exerciseType 들 조회
+    Map<Exercise, List<ExerciseTypeRelation>> exerciseTypeMap = exerciseTypeRelationRepository.findAllByExerciseIdIn(
+        exercises.keySet())
+      .stream()
+      .collect(Collectors.groupingBy(ExerciseTypeRelation::getExercise));
+
+    UserExerciseLogData logData = new UserExerciseLogData();
 
     int routineSize = dto.routineDTOList().size();
     Set<Integer> routineOrderMemo = new HashSet<>();
+
     List<UserExerciseRoutine> routineEntityList = dto.routineDTOList()
       .stream()
       .map(routineDTO -> {
@@ -100,7 +109,15 @@ public class UserExerciseLogCmService {
           throw new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND);
         }
 
-        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, exercise, logData);
+        Set<ExerciseType> exerciseTypes = exerciseTypeMap.get(exercise.getId())
+          .stream()
+          .map(ExerciseTypeRelation::getExerciseType)
+          .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(exerciseTypes)) {
+          throw new ExerciseException(ExerciseExceptionCode.NOT_FOUND_RELATION_EXERCISE_TYPE);
+        }
+
+        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, exercise, exerciseTypes, logData);
       })
       .toList();
 

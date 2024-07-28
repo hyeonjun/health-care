@@ -25,11 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -62,15 +62,7 @@ public class ExerciseHelper {
 
   @Transactional
   public UserExerciseRoutine createUserExerciseRoutineAndSet(CreateUserExerciseRoutineDTO dto,
-    Exercise exercise, UserExerciseLogData userExerciseLogData) {
-    Set<ExerciseType> exerciseTypes = exerciseTypeRelationRepository.findAllByExercise(exercise)
-      .stream()
-      .map(ExerciseTypeRelation::getExerciseType)
-      .collect(Collectors.toSet());
-    if (CollectionUtils.isEmpty(exerciseTypes)) {
-      throw new ExerciseException(ExerciseExceptionCode.NOT_FOUND_RELATION_EXERCISE_TYPE);
-    }
-
+    Exercise exercise, Set<ExerciseType> exerciseTypes, UserExerciseLogData userExerciseLogData) {
     UserExerciseRoutineData routineData = new UserExerciseRoutineData();
 
     int totalSetSize = dto.setDTOList().size();
@@ -106,7 +98,7 @@ public class ExerciseHelper {
     return routineEntity;
   }
 
-  private void checkExerciseType(Set<ExerciseType> types, ExerciseType type, Object value) {
+  private void checkExerciseType(Collection<ExerciseType> types, ExerciseType type, Object value) {
     if ((types.contains(type) && Objects.isNull(value)) || (!types.contains(type) && Objects.nonNull(value))) {
       throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
     }
