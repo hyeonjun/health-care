@@ -6,10 +6,14 @@ import com.example.healthcare.application.account.helper.UserHelper;
 import com.example.healthcare.application.account.repository.UserRepository;
 import com.example.healthcare.application.common.exception.DuplicateException;
 import com.example.healthcare.application.common.exception.DuplicateException.DuplicateExceptionCode;
+import com.example.healthcare.application.common.exception.InvalidInputValueException;
+import com.example.healthcare.application.common.exception.InvalidInputValueException.InvalidInputValueExceptionCode;
 import com.example.healthcare.application.common.exception.ResourceException;
 import com.example.healthcare.application.common.exception.ResourceException.ResourceExceptionCode;
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseLogDTO;
+import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
 import com.example.healthcare.application.exercise.controller.dto.UpdateUserExerciseLogDTO;
+import com.example.healthcare.application.exercise.domain.Exercise;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
 import com.example.healthcare.application.exercise.domain.UserExerciseRoutine;
 import com.example.healthcare.application.exercise.exception.ExerciseException;
@@ -34,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,17 +74,32 @@ public class UserExerciseLogCmService {
     // 운동 종록(routine) + 운동 세트(set)
     UserExerciseLogData logData = new UserExerciseLogData();
 
+    List<Long> exerciseIds = dto.routineDTOList().stream()
+      .map(CreateUserExerciseRoutineDTO::exerciseId)
+      .toList();
+    Map<Long, Exercise> exercises = exerciseRepository.findAllByIdIn(exerciseIds)
+      .stream().collect(Collectors.toMap(Exercise::getId, exercise -> exercise));
+
     int routineSize = dto.routineDTOList().size();
     Set<Integer> routineOrderMemo = new HashSet<>();
     List<UserExerciseRoutine> routineEntityList = dto.routineDTOList()
       .stream()
       .map(routineDTO -> {
-        if (routineDTO.order() != null && routineOrderMemo.contains(routineDTO.order())) {
+        if (routineOrderMemo.contains(routineDTO.order())) {
           throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_ROUTINE_ORDER);
         }
         routineOrderMemo.add(routineDTO.order());
 
-        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, routineSize, logData);
+        if (routineDTO.order() > routineSize) {
+          throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
+        }
+
+        Exercise exercise = exercises.get(routineDTO.exerciseId());
+        if (exercise == null) {
+          throw new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND);
+        }
+
+        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, exercise, logData);
       })
       .toList();
 
