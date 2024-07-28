@@ -79,6 +79,7 @@ public class UserExerciseLogCmService {
       .toList();
     Map<Long, Exercise> exercises = exerciseRepository.findAllByIdIn(exerciseIds)
       .stream().collect(Collectors.toMap(Exercise::getId, exercise -> exercise));
+    // 각 exercise 관련 exerciseType 들 조회
 
     int routineSize = dto.routineDTOList().size();
     Set<Integer> routineOrderMemo = new HashSet<>();
@@ -165,8 +166,23 @@ public class UserExerciseLogCmService {
 
   @Transactional
   public void deleteExerciseLog(LoginUser loginUser, Long exerciseLogId) {
-    // UserExerciseLog delete
-    // UserExerciseRoutine bulk delete -> bulk update 구현
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    UserExerciseLog userExerciseLog = userExerciseLogRepository.findById(exerciseLogId)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    userHelper.checkAuthorization(user, userExerciseLog.getUser());
+
+    if (userExerciseLog.isDeleted()) {
+      throw new ExerciseException(ExerciseExceptionCode.DELETED_EXERCISE_LOG);
+    }
+
+    // UserExerciseLog Related UserExerciseRoutine delete(update)
+    userExerciseRoutineRepository.deleteAllByUserExerciseLogIdQuery(userExerciseLog.getId());
+
+    // UserExerciseLog delete(update)
+    userExerciseLogRepository.deleteById(exerciseLogId);
   }
 
 }
