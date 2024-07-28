@@ -72,6 +72,10 @@ public abstract class CustomQuerydslRepositorySupport {
     return getQueryFactory().selectFrom(from);
   }
 
+  protected <T> JPAQuery<T> selectDistinct(Expression<T> from) {
+    return getQueryFactory().selectDistinct(from);
+  }
+
   protected <T> Page<T> applyPagination(Pageable pageable, JPAQuery<T> jpaQuery) {
     List<T> result = getQuerydsl().applyPagination(pageable, jpaQuery).fetch();
     return PageableExecutionUtils.getPage(result, pageable, jpaQuery::fetchCount);
