@@ -26,6 +26,7 @@ import com.example.healthcare.application.vo.UserExerciseLogVO;
 import com.example.healthcare.application.vo.UserExerciseRoutineVO;
 import com.example.healthcare.application.vo.UserExerciseSetVO;
 import com.example.healthcare.infra.config.security.user.LoginUser;
+import com.example.healthcare.util.VerifyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class UserExerciseLogCmService {
 
-  private static final int MAX_PAGE_SIZE = 1000;
+  private static final PageRequest DEFAULT_PAGE_REQUEST = PageRequest.of(0, VerifyUtil.MAX_PAGE_SIZE);
 
   private final UserHelper userHelper;
   private final ExerciseHelper exerciseHelper;
@@ -91,16 +92,20 @@ public class UserExerciseLogCmService {
     userExerciseSetRepository.saveAll(logData.setEntityList);
   }
 
-  // Paging 28 ~ 31
+  // Paging Max Size 28 ~ 31
   public Page<UserExerciseLogVO> getExerciseLogMonthly(LoginUser loginUser, Integer year, Integer month) {
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
-    return null;
+    return userExerciseLogRepository.findExerciseLogMonthly(user, year, month, DEFAULT_PAGE_REQUEST);
   }
 
   // Paging (max 2)
   public Page<UserExerciseLogSummaryVO> getExerciseLogDaily(LoginUser loginUser, Integer year, Integer month, Integer day) {
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
-    return null;
+    return userExerciseLogRepository.findExerciseLogDaily(user, year, month, day, DEFAULT_PAGE_REQUEST);
   }
 
   // log calc info + inner (routine + set) info
@@ -119,12 +124,12 @@ public class UserExerciseLogCmService {
 
     // get related routine and related set
     Map<Long, List<UserExerciseSetVO>> routineSetMaps = userExerciseLogRepository.findExerciseSetAllByLog(
-        userExerciseLog, PageRequest.of(0, MAX_PAGE_SIZE))
+        userExerciseLog, DEFAULT_PAGE_REQUEST)
       .stream()
       .collect(Collectors.groupingBy(UserExerciseSetVO::routineId));
 
     List<UserExerciseRoutineVO> routines = userExerciseLogRepository.findExerciseRoutineAllByLog(
-        userExerciseLog, PageRequest.of(0, MAX_PAGE_SIZE))
+        userExerciseLog, DEFAULT_PAGE_REQUEST)
       .stream()
       .peek(routine -> routine.setExerciseSetList(routineSetMaps.get(routine.getRoutineId())))
       .toList();

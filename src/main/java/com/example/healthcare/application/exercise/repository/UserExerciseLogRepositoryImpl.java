@@ -1,8 +1,13 @@
 package com.example.healthcare.application.exercise.repository;
 
+import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
+import com.example.healthcare.application.vo.QUserExerciseLogSummaryVO;
+import com.example.healthcare.application.vo.QUserExerciseLogVO;
 import com.example.healthcare.application.vo.QUserExerciseRoutineVO;
 import com.example.healthcare.application.vo.QUserExerciseSetVO;
+import com.example.healthcare.application.vo.UserExerciseLogSummaryVO;
+import com.example.healthcare.application.vo.UserExerciseLogVO;
 import com.example.healthcare.application.vo.UserExerciseRoutineVO;
 import com.example.healthcare.application.vo.UserExerciseSetVO;
 import com.example.healthcare.util.repository.CustomQuerydslRepositorySupport;
@@ -20,6 +25,45 @@ public class UserExerciseLogRepositoryImpl extends CustomQuerydslRepositorySuppo
 
   public UserExerciseLogRepositoryImpl() {
     super(UserExerciseLog.class);
+  }
+
+  @Override
+  public Page<UserExerciseLogVO> findExerciseLogMonthly(User user, Integer year, Integer month, Pageable pageable) {
+    JPAQuery<UserExerciseLogVO> query = selectDistinct(new QUserExerciseLogVO(
+        userExerciseLog.exerciseDate))
+      .from(userExerciseLog)
+      .where(userExerciseLog.isDeleted.isFalse()
+        .and(userExerciseLog.user.eq(user))
+        .and(userExerciseLog.exerciseDate.year().eq(year))
+        .and(userExerciseLog.exerciseDate.month().eq(month)))
+      .orderBy(userExerciseLog.exerciseDate.asc());
+
+    return applyPagination(pageable, query);
+  }
+
+  @Override
+  public Page<UserExerciseLogSummaryVO> findExerciseLogDaily(User user, Integer year, Integer month, Integer day, Pageable pageable) {
+    JPAQuery<UserExerciseLogSummaryVO> query = select(new QUserExerciseLogSummaryVO(
+      userExerciseLog.exerciseDate,
+      userExerciseLog.id,
+      userExerciseLog.exerciseCount,
+      userExerciseLog.exerciseTime,
+      userExerciseLog.isDeleted,
+      userExerciseLog.totalSetCount,
+      userExerciseLog.totalWeight,
+      userExerciseLog.totalReps,
+      userExerciseLog.totalTime,
+      userExerciseLog.exerciseTimeType
+    ))
+      .from(userExerciseLog)
+      .where(userExerciseLog.isDeleted.isFalse()
+        .and(userExerciseLog.user.eq(user))
+        .and(userExerciseLog.exerciseDate.year().eq(year))
+        .and(userExerciseLog.exerciseDate.month().eq(month))
+        .and(userExerciseLog.exerciseDate.dayOfMonth().eq(day)))
+      .orderBy(userExerciseLog.exerciseDate.asc());
+
+    return applyPagination(pageable, query);
   }
 
   @Override
