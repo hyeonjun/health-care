@@ -68,6 +68,10 @@ public abstract class CustomQuerydslRepositorySupport {
     return getQueryFactory().select(expr);
   }
 
+  protected JPAQuery<Integer> selectOne() {
+    return getQueryFactory().selectOne();
+  }
+
   protected <T> JPAQuery<T> selectFrom(EntityPath<T> from) {
     return getQueryFactory().selectFrom(from);
   }

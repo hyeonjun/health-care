@@ -6,7 +6,7 @@ import com.example.healthcare.application.exercise.domain.code.ExerciseSetType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateUserExerciseSetDTO(
+public record UpdateUserExerciseSetDTO(
   @NotNull @Min(1) Long setNumber,
   @NotNull ExerciseSetType exerciseSetType,
   Double weight,
@@ -15,7 +15,7 @@ public record CreateUserExerciseSetDTO(
   @NotNull Boolean complete
 ) implements ExerciseSetDTO {
 
-  public CreateUserExerciseSetDTO {
+  public UpdateUserExerciseSetDTO {
     if (weight == null && reps == null && time == null) {
       throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
     }

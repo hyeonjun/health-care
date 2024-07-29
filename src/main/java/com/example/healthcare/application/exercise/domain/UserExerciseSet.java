@@ -1,7 +1,7 @@
 package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.common.domain.Base;
-import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseSetDTO;
+import com.example.healthcare.application.exercise.controller.dto.ExerciseSetDTO;
 import com.example.healthcare.application.exercise.domain.code.ExerciseSetType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
@@ -44,7 +44,7 @@ public class UserExerciseSet extends Base {
   @Column(name = "exercise_set_type", length = 191)
   private ExerciseSetType exerciseSetType;
 
-  private Long weight;
+  private double weight;
   private Integer reps;
   private Long time;
 
@@ -55,14 +55,14 @@ public class UserExerciseSet extends Base {
   @JsonBackReference
   private UserExerciseRoutine userExerciseRoutine;
 
-  public static UserExerciseSet createSet(CreateUserExerciseSetDTO dto) {
+  public static UserExerciseSet createSet(ExerciseSetDTO dto) {
     return builder()
-      .setNumber(dto.serNumber())
-      .exerciseSetType(dto.exerciseSetType())
-      .weight(dto.weight())
-      .reps(dto.reps())
-      .time(dto.time())
-      .complete(dto.complete())
+      .setNumber(dto.getSetNumber())
+      .exerciseSetType(dto.getSetType())
+      .weight(dto.getWeight())
+      .reps(dto.getReps())
+      .time(dto.getTime())
+      .complete(dto.getComplete())
       .build();
   }
 

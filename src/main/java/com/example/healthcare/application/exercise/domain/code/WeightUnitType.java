@@ -12,11 +12,11 @@ public enum WeightUnitType {
 
   private final String unit;
 
-  public static long kgToLbs(long kg) {
-    return (long) (kg * 2.20462);
+  public static double kgToLbs(double kg) {
+    return (kg * 2.20462);
   }
 
-  public static long lbsToKg(long lbs) {
-    return (long) (lbs * 0.45359237);
+  public static double lbsToKg(double lbs) {
+    return (lbs * 0.45359237);
   }
 }

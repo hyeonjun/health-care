@@ -2,7 +2,9 @@ package com.example.healthcare.repository.exercise;
 
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
+import com.example.healthcare.application.exercise.domain.code.ExerciseTimeType;
 import com.example.healthcare.application.exercise.repository.UserExerciseLogRepository;
+import com.example.healthcare.application.exercise.repository.param.SearchUserExerciseLogParam;
 import com.example.healthcare.application.vo.UserExerciseLogSummaryVO;
 import com.example.healthcare.application.vo.UserExerciseLogVO;
 import com.example.healthcare.application.vo.UserExerciseRoutineVO;
@@ -17,6 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -26,6 +31,20 @@ public class UserExerciseLogRepositoryTest {
 
   @Autowired
   private UserExerciseLogRepository userExerciseLogRepository;
+
+  @Test
+  void existExerciseLogTest() {
+    User user = MockUtil.createEntityInstance(User.class);
+    MockUtil.setEntityFieldValue(user, "id", 1L);
+
+    UserExerciseLog userExerciseLog = MockUtil.createEntityInstance(UserExerciseLog.class);
+    MockUtil.setEntityFieldValue(userExerciseLog, "id", 1L);
+    MockUtil.setEntityFieldValue(userExerciseLog, "exerciseDate", LocalDate.now());
+
+    SearchUserExerciseLogParam param = SearchUserExerciseLogParam.valueOf(userExerciseLog, Set.of(ExerciseTimeType.values()));
+    Boolean result = userExerciseLogRepository.existExerciseLog(user, param);
+    assertThat(result).isNotNull();
+  }
 
   @Test
   void findExerciseLogMonthlyTest() {

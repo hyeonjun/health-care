@@ -6,19 +6,29 @@ import com.example.healthcare.application.account.helper.UserHelper;
 import com.example.healthcare.application.account.repository.UserRepository;
 import com.example.healthcare.application.common.exception.DuplicateException;
 import com.example.healthcare.application.common.exception.DuplicateException.DuplicateExceptionCode;
+import com.example.healthcare.application.common.exception.InvalidInputValueException;
+import com.example.healthcare.application.common.exception.InvalidInputValueException.InvalidInputValueExceptionCode;
 import com.example.healthcare.application.common.exception.ResourceException;
 import com.example.healthcare.application.common.exception.ResourceException.ResourceExceptionCode;
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseLogDTO;
+import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
 import com.example.healthcare.application.exercise.controller.dto.UpdateUserExerciseLogDTO;
+import com.example.healthcare.application.exercise.domain.Exercise;
+import com.example.healthcare.application.exercise.domain.ExerciseTypeRelation;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
 import com.example.healthcare.application.exercise.domain.UserExerciseRoutine;
+import com.example.healthcare.application.exercise.domain.UserExerciseSet;
+import com.example.healthcare.application.exercise.domain.code.ExerciseTimeType;
+import com.example.healthcare.application.exercise.domain.code.ExerciseType;
 import com.example.healthcare.application.exercise.exception.ExerciseException;
 import com.example.healthcare.application.exercise.exception.ExerciseException.ExerciseExceptionCode;
 import com.example.healthcare.application.exercise.helper.ExerciseHelper;
 import com.example.healthcare.application.exercise.repository.ExerciseRepository;
+import com.example.healthcare.application.exercise.repository.ExerciseTypeRelationRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseLogRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseRoutineRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseSetRepository;
+import com.example.healthcare.application.exercise.repository.param.SearchUserExerciseLogParam;
 import com.example.healthcare.application.exercise.service.data.UserExerciseData.UserExerciseLogData;
 import com.example.healthcare.application.vo.UserExerciseLogDetailVO;
 import com.example.healthcare.application.vo.UserExerciseLogSummaryVO;
@@ -32,6 +42,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -51,6 +62,7 @@ public class UserExerciseLogCmService {
   private final ExerciseHelper exerciseHelper;
   private final UserRepository userRepository;
   private final ExerciseRepository exerciseRepository;
+  private final ExerciseTypeRelationRepository exerciseTypeRelationRepository;
   private final UserExerciseLogRepository userExerciseLogRepository;
   private final UserExerciseRoutineRepository userExerciseRoutineRepository;
   private final UserExerciseSetRepository userExerciseSetRepository;
@@ -60,28 +72,19 @@ public class UserExerciseLogCmService {
     User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
       .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
-    Integer exerciseCount = 0;
-    BigInteger totalSetCount = null;
-    BigInteger totalWeight = null;
-    BigInteger totalReps = null;
-    BigInteger totalTime = null;
+    // 기존 등록된 기록이 있는지 확인
+    // DEFAULT ->  DEFAULT, AM, PM X
+    // AM -> PM만 존재 / DEFAULT, AM X
+    // PM -> AM만 존재 / DEFAULT, PM X
+    if (userExerciseLogRepository.existExerciseLog(
+      user, SearchUserExerciseLogParam.valueOf(dto.exerciseDate(), ExerciseTimeType.getNotAvailableTimeTypes(dto.exerciseTimeType())))) {
+      throw new ExerciseException(ExerciseExceptionCode.ALREADY_CREATED_AVAILABLE_EXERCISE_LOG);
+    }
+
 
     // 운동 종록(routine) + 운동 세트(set)
     UserExerciseLogData logData = new UserExerciseLogData();
-
-    int routineSize = dto.routineDTOList().size();
-    Set<Integer> routineOrderMemo = new HashSet<>();
-    List<UserExerciseRoutine> routineEntityList = dto.routineDTOList()
-      .stream()
-      .map(routineDTO -> {
-        if (routineDTO.order() != null && routineOrderMemo.contains(routineDTO.order())) {
-          throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_ROUTINE_ORDER);
-        }
-        routineOrderMemo.add(routineDTO.order());
-
-        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, routineSize, logData);
-      })
-      .toList();
+    List<UserExerciseRoutine> routineEntityList = exerciseHelper.createExerciseRoutine(dto.routineDTOList(), logData);
 
     // 운동 기록(log)
     UserExerciseLog logEntity = UserExerciseLog.createLog(dto, user, logData);
@@ -139,14 +142,61 @@ public class UserExerciseLogCmService {
 
   @Transactional
   public void updateExerciseLog(LoginUser loginUser, Long exerciseLogId, UpdateUserExerciseLogDTO dto) {
-    // 삭제된 routine 없는지 확인
-    // 삭제된 set 없는지 확인
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    UserExerciseLog userExerciseLog = userExerciseLogRepository.findById(exerciseLogId)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    userHelper.checkAuthorization(user, userExerciseLog.getUser());
+
+    if (userExerciseLog.isDeleted()) {
+      throw new ExerciseException(ExerciseExceptionCode.DELETED_EXERCISE_LOG);
+    }
+
+    // 기존 등록된 기록이 있는지 확인
+    // DEFAULT ->  DEFAULT, AM, PM X
+    // AM -> PM만 존재 / DEFAULT, AM X
+    // PM -> AM만 존재 / DEFAULT, PM X
+    if (userExerciseLogRepository.existExerciseLog(
+      user, SearchUserExerciseLogParam.valueOf(userExerciseLog, ExerciseTimeType.getNotAvailableTimeTypes(dto.exerciseTimeType())))) {
+      throw new ExerciseException(ExerciseExceptionCode.ALREADY_CREATED_AVAILABLE_EXERCISE_LOG);
+    }
+
+    // 기존 관련 루틴 제거 -> 새로 생성
+    userExerciseRoutineRepository.deleteAllByUserExerciseLogIdQuery(userExerciseLog.getId());
+
+    // 운동 종록(routine) + 운동 세트(set)
+    UserExerciseLogData logData = new UserExerciseLogData();
+    List<UserExerciseRoutine> routineEntityList = exerciseHelper.createExerciseRoutine(dto.routineDTOList(), logData);
+    routineEntityList.forEach(routine -> routine.applyLog(userExerciseLog));
+
+    // 운동 기록(log)
+    userExerciseLog.updateLog(dto, logData);
+    userExerciseLogRepository.save(userExerciseLog);
+    userExerciseRoutineRepository.saveAll(routineEntityList);
+    userExerciseSetRepository.saveAll(logData.setEntityList);
   }
 
   @Transactional
   public void deleteExerciseLog(LoginUser loginUser, Long exerciseLogId) {
-    // UserExerciseLog delete
-    // UserExerciseRoutine bulk delete -> bulk update 구현
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    UserExerciseLog userExerciseLog = userExerciseLogRepository.findById(exerciseLogId)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    userHelper.checkAuthorization(user, userExerciseLog.getUser());
+
+    if (userExerciseLog.isDeleted()) {
+      throw new ExerciseException(ExerciseExceptionCode.DELETED_EXERCISE_LOG);
+    }
+
+    // UserExerciseLog Related UserExerciseRoutine delete(update)
+    userExerciseRoutineRepository.deleteAllByUserExerciseLogIdQuery(userExerciseLog.getId());
+
+    // UserExerciseLog delete(update)
+    userExerciseLogRepository.deleteById(exerciseLogId);
   }
 
 }

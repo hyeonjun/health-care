@@ -3,6 +3,7 @@ package com.example.healthcare.application.exercise.domain;
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.common.domain.Base;
 import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseLogDTO;
+import com.example.healthcare.application.exercise.controller.dto.UpdateUserExerciseLogDTO;
 import com.example.healthcare.application.exercise.domain.code.ExerciseTimeType;
 import com.example.healthcare.application.exercise.service.data.UserExerciseData.UserExerciseLogData;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -18,7 +19,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,9 +37,6 @@ import java.util.Objects;
 @DynamicUpdate
 @Getter
 @Table(name = "user_exercise_log",
-  uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"exercise_date", "exercise_time_type", "user_id"})
-  },
   indexes = {@Index(columnList = "exercise_date, user_id")}
 )
 @SQLDelete(sql = "UPDATE user_exercise_log SET is_deleted = true where user_exercise_log_id = ?")
@@ -87,6 +84,16 @@ public class UserExerciseLog extends Base {
       .exerciseTimeType(dto.exerciseTimeType())
       .user(user)
       .build();
+  }
+
+  public void updateLog(UpdateUserExerciseLogDTO dto, UserExerciseLogData data) {
+    this.exerciseCount = data.exerciseCount;
+    this.exerciseTime = dto.exerciseTime();
+    this.totalSetCount = data.totalSetCount;
+    this.totalWeight = data.totalWeight;
+    this.totalReps = data.totalReps;
+    this.totalTime = data.totalTime;
+
   }
 
   @Override
