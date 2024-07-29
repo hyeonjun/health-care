@@ -1,7 +1,7 @@
 package com.example.healthcare.application.exercise.domain;
 
 import com.example.healthcare.application.common.domain.Base;
-import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
+import com.example.healthcare.application.exercise.controller.dto.RoutineDTO;
 import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import com.example.healthcare.application.exercise.service.data.UserExerciseData.UserExerciseRoutineData;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -75,17 +75,17 @@ public class UserExerciseRoutine extends Base {
   @JsonBackReference
   private Exercise exercise;
 
-  public static UserExerciseRoutine createRoutine(CreateUserExerciseRoutineDTO dto,
+  public static UserExerciseRoutine createRoutine(RoutineDTO dto,
     UserExerciseRoutineData routineData, Exercise exercise) {
     return builder()
       .isDeleted(false)
-      .restTime(dto.restTime())
-      .order(dto.order())
+      .restTime(dto.getRestTime())
+      .order(dto.getOrder())
       .setCount(routineData.setCount)
       .sumWeight(routineData.sumWeight)
       .sumReps(routineData.sumReps)
       .sumTime(routineData.sumTime)
-      .weightUnitType(dto.weightUnitType() != null ? dto.weightUnitType() : WeightUnitType.KILOGRAM)
+      .weightUnitType(dto.getWeightUnitType() != null ? dto.getWeightUnitType() : WeightUnitType.KILOGRAM)
       .exercise(exercise)
       .build();
   }

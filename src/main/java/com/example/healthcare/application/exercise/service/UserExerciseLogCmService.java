@@ -17,6 +17,8 @@ import com.example.healthcare.application.exercise.domain.Exercise;
 import com.example.healthcare.application.exercise.domain.ExerciseTypeRelation;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
 import com.example.healthcare.application.exercise.domain.UserExerciseRoutine;
+import com.example.healthcare.application.exercise.domain.UserExerciseSet;
+import com.example.healthcare.application.exercise.domain.code.ExerciseTimeType;
 import com.example.healthcare.application.exercise.domain.code.ExerciseType;
 import com.example.healthcare.application.exercise.exception.ExerciseException;
 import com.example.healthcare.application.exercise.exception.ExerciseException.ExerciseExceptionCode;
@@ -26,6 +28,7 @@ import com.example.healthcare.application.exercise.repository.ExerciseTypeRelati
 import com.example.healthcare.application.exercise.repository.UserExerciseLogRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseRoutineRepository;
 import com.example.healthcare.application.exercise.repository.UserExerciseSetRepository;
+import com.example.healthcare.application.exercise.repository.param.SearchUserExerciseLogParam;
 import com.example.healthcare.application.exercise.service.data.UserExerciseData.UserExerciseLogData;
 import com.example.healthcare.application.vo.UserExerciseLogDetailVO;
 import com.example.healthcare.application.vo.UserExerciseLogSummaryVO;
@@ -69,57 +72,19 @@ public class UserExerciseLogCmService {
     User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
       .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
 
-    Integer exerciseCount = 0;
-    BigInteger totalSetCount = null;
-    BigInteger totalWeight = null;
-    BigInteger totalReps = null;
-    BigInteger totalTime = null;
+    // 기존 등록된 기록이 있는지 확인
+    // DEFAULT ->  DEFAULT, AM, PM X
+    // AM -> PM만 존재 / DEFAULT, AM X
+    // PM -> AM만 존재 / DEFAULT, PM X
+    if (userExerciseLogRepository.existExerciseLog(
+      user, SearchUserExerciseLogParam.valueOf(dto.exerciseDate(), ExerciseTimeType.getNotAvailableTimeTypes(dto.exerciseTimeType())))) {
+      throw new ExerciseException(ExerciseExceptionCode.ALREADY_CREATED_AVAILABLE_EXERCISE_LOG);
+    }
+
 
     // 운동 종록(routine) + 운동 세트(set)
-    List<Long> exerciseIds = dto.routineDTOList().stream()
-      .map(CreateUserExerciseRoutineDTO::exerciseId)
-      .toList();
-    Map<Long, Exercise> exercises = exerciseRepository.findAllByIdIn(exerciseIds)
-      .stream().collect(Collectors.toMap(Exercise::getId, exercise -> exercise));
-    // 각 exercise 관련 exerciseType 들 조회
-    Map<Exercise, List<ExerciseTypeRelation>> exerciseTypeMap = exerciseTypeRelationRepository.findAllByExerciseIdIn(
-        exercises.keySet())
-      .stream()
-      .collect(Collectors.groupingBy(ExerciseTypeRelation::getExercise));
-
     UserExerciseLogData logData = new UserExerciseLogData();
-
-    int routineSize = dto.routineDTOList().size();
-    Set<Integer> routineOrderMemo = new HashSet<>();
-
-    List<UserExerciseRoutine> routineEntityList = dto.routineDTOList()
-      .stream()
-      .map(routineDTO -> {
-        if (routineOrderMemo.contains(routineDTO.order())) {
-          throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_ROUTINE_ORDER);
-        }
-        routineOrderMemo.add(routineDTO.order());
-
-        if (routineDTO.order() > routineSize) {
-          throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
-        }
-
-        Exercise exercise = exercises.get(routineDTO.exerciseId());
-        if (exercise == null) {
-          throw new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND);
-        }
-
-        Set<ExerciseType> exerciseTypes = exerciseTypeMap.get(exercise.getId())
-          .stream()
-          .map(ExerciseTypeRelation::getExerciseType)
-          .collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(exerciseTypes)) {
-          throw new ExerciseException(ExerciseExceptionCode.NOT_FOUND_RELATION_EXERCISE_TYPE);
-        }
-
-        return exerciseHelper.createUserExerciseRoutineAndSet(routineDTO, exercise, exerciseTypes, logData);
-      })
-      .toList();
+    List<UserExerciseRoutine> routineEntityList = exerciseHelper.createExerciseRoutine(dto.routineDTOList(), logData);
 
     // 운동 기록(log)
     UserExerciseLog logEntity = UserExerciseLog.createLog(dto, user, logData);
@@ -177,8 +142,40 @@ public class UserExerciseLogCmService {
 
   @Transactional
   public void updateExerciseLog(LoginUser loginUser, Long exerciseLogId, UpdateUserExerciseLogDTO dto) {
-    // 삭제된 routine 없는지 확인
-    // 삭제된 set 없는지 확인
+    User user = userRepository.findByIdAndUserStatusIs(loginUser.getId(), UserStatus.ACTIVATED)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    UserExerciseLog userExerciseLog = userExerciseLogRepository.findById(exerciseLogId)
+      .orElseThrow(() -> new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND));
+
+    userHelper.checkAuthorization(user, userExerciseLog.getUser());
+
+    if (userExerciseLog.isDeleted()) {
+      throw new ExerciseException(ExerciseExceptionCode.DELETED_EXERCISE_LOG);
+    }
+
+    // 기존 등록된 기록이 있는지 확인
+    // DEFAULT ->  DEFAULT, AM, PM X
+    // AM -> PM만 존재 / DEFAULT, AM X
+    // PM -> AM만 존재 / DEFAULT, PM X
+    if (userExerciseLogRepository.existExerciseLog(
+      user, SearchUserExerciseLogParam.valueOf(userExerciseLog, ExerciseTimeType.getNotAvailableTimeTypes(dto.exerciseTimeType())))) {
+      throw new ExerciseException(ExerciseExceptionCode.ALREADY_CREATED_AVAILABLE_EXERCISE_LOG);
+    }
+
+    // 기존 관련 루틴 제거 -> 새로 생성
+    userExerciseRoutineRepository.deleteAllByUserExerciseLogIdQuery(userExerciseLog.getId());
+
+    // 운동 종록(routine) + 운동 세트(set)
+    UserExerciseLogData logData = new UserExerciseLogData();
+    List<UserExerciseRoutine> routineEntityList = exerciseHelper.createExerciseRoutine(dto.routineDTOList(), logData);
+    routineEntityList.forEach(routine -> routine.applyLog(userExerciseLog));
+
+    // 운동 기록(log)
+    userExerciseLog.updateLog(dto, logData);
+    userExerciseLogRepository.save(userExerciseLog);
+    userExerciseRoutineRepository.saveAll(routineEntityList);
+    userExerciseSetRepository.saveAll(logData.setEntityList);
   }
 
   @Transactional

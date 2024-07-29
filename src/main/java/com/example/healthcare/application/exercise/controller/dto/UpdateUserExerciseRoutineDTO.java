@@ -9,13 +9,13 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
-public record CreateUserExerciseRoutineDTO(
+public record UpdateUserExerciseRoutineDTO(
   @NotNull @Max(660) Long restTime, // second 단위, 최대 11분 -> 60 * 11
   @NotNull @Min(1) Integer order,
   WeightUnitType weightUnitType,
   @NotNull Long exerciseId,
 
-  @Valid @Size(max = 1000) List<CreateUserExerciseSetDTO> setDTOList
+  @Valid @Size(max = 1000) List<UpdateUserExerciseSetDTO> setDTOList
 ) implements RoutineDTO {
 
   @Override

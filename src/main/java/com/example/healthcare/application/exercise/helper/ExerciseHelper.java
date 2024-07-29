@@ -5,8 +5,10 @@ import com.example.healthcare.application.common.exception.DuplicateException;
 import com.example.healthcare.application.common.exception.DuplicateException.DuplicateExceptionCode;
 import com.example.healthcare.application.common.exception.InvalidInputValueException;
 import com.example.healthcare.application.common.exception.InvalidInputValueException.InvalidInputValueExceptionCode;
+import com.example.healthcare.application.common.exception.ResourceException;
+import com.example.healthcare.application.common.exception.ResourceException.ResourceExceptionCode;
 import com.example.healthcare.application.exercise.controller.dto.CreateExerciseDTO;
-import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseRoutineDTO;
+import com.example.healthcare.application.exercise.controller.dto.RoutineDTO;
 import com.example.healthcare.application.exercise.domain.Exercise;
 import com.example.healthcare.application.exercise.domain.ExerciseTypeRelation;
 import com.example.healthcare.application.exercise.domain.UserExerciseRoutine;
@@ -25,16 +27,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class ExerciseHelper {
 
+  private final UserExerciseHelper userExerciseHelper;
   private final ExerciseRepository exerciseRepository;
   private final ExerciseTypeRelationRepository exerciseTypeRelationRepository;
 
@@ -61,47 +64,59 @@ public class ExerciseHelper {
   }
 
   @Transactional
-  public UserExerciseRoutine createUserExerciseRoutineAndSet(CreateUserExerciseRoutineDTO dto,
-    Exercise exercise, Set<ExerciseType> exerciseTypes, UserExerciseLogData userExerciseLogData) {
-    UserExerciseRoutineData routineData = new UserExerciseRoutineData();
+  public List<UserExerciseRoutine> createExerciseRoutine(List<? extends RoutineDTO> dto, UserExerciseLogData logData) {
+    // 운동 종록(routine) + 운동 세트(set)
+    List<Long> exerciseIds = dto.stream()
+      .map(RoutineDTO::getExerciseId)
+      .toList();
+    Map<Long, Exercise> exercises = exerciseRepository.findAllByIdIn(exerciseIds)
+      .stream().collect(Collectors.toMap(Exercise::getId, exercise -> exercise));
+    // 각 exercise 관련 exerciseType 들 조회
+    Map<Exercise, List<ExerciseTypeRelation>> exerciseTypeMap = exerciseTypeRelationRepository.findAllByExerciseIdIn(
+        exercises.keySet())
+      .stream()
+      .collect(Collectors.groupingBy(ExerciseTypeRelation::getExercise));
 
-    int totalSetSize = dto.setDTOList().size();
-    Set<Long> setNumberMemo = new HashSet<>();
-    List<UserExerciseSet> setList = dto.setDTOList().stream()
-      .map(setDTO -> {
-        // setNumber validation
-        if (setDTO.serNumber() > totalSetSize) {
+    int routineSize = dto.size();
+    Set<Integer> routineOrderMemo = new HashSet<>();
+
+    return dto
+      .stream()
+      .map(routineDTO -> {
+        if (routineOrderMemo.contains(routineDTO.getOrder())) {
+          throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_ROUTINE_ORDER);
+        }
+        routineOrderMemo.add(routineDTO.getOrder());
+
+        if (routineDTO.getOrder() > routineSize) {
           throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
         }
 
-        if (setNumberMemo.contains(setDTO.serNumber())) {
-          throw new DuplicateException(DuplicateExceptionCode.DUPLICATE_SET_NUMBER);
+        Exercise exercise = exercises.get(routineDTO.getExerciseId());
+        if (exercise == null) {
+          throw new ResourceException(ResourceExceptionCode.RESOURCE_NOT_FOUND);
         }
-        setNumberMemo.add(setDTO.serNumber());
 
-        // exerciseType validation
-        checkExerciseType(exerciseTypes, ExerciseType.WEIGHT, setDTO.weight());
-        checkExerciseType(exerciseTypes, ExerciseType.REPS, setDTO.reps());
-        checkExerciseType(exerciseTypes, ExerciseType.TIME, setDTO.time());
+        Set<ExerciseType> exerciseTypes = exerciseTypeMap.get(exercise)
+          .stream()
+          .map(ExerciseTypeRelation::getExerciseType)
+          .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(exerciseTypes)) {
+          throw new ExerciseException(ExerciseExceptionCode.NOT_FOUND_RELATION_EXERCISE_TYPE);
+        }
 
-        UserExerciseSet setEntity = UserExerciseSet.createSet(setDTO);
-        routineData.update(setDTO, dto.weightUnitType());
-        return setEntity;
-      }).toList();
+        UserExerciseRoutineData routineData = new UserExerciseRoutineData();
+        List<UserExerciseSet> setList = userExerciseHelper.createUserExerciseSet(
+          routineDTO, exerciseTypes, routineData);
 
-    UserExerciseRoutine routineEntity = UserExerciseRoutine.createRoutine(dto, routineData, exercise);
+        UserExerciseRoutine routineEntity = UserExerciseRoutine.createRoutine(routineDTO, routineData, exercise);
+        setList.forEach(set -> set.applyRoutine(routineEntity));
 
-    setList.forEach(set -> set.applyRoutine(routineEntity));
-
-    userExerciseLogData.setEntityList.addAll(setList);
-    userExerciseLogData.update(routineData);
-    return routineEntity;
-  }
-
-  private void checkExerciseType(Collection<ExerciseType> types, ExerciseType type, Object value) {
-    if ((types.contains(type) && Objects.isNull(value)) || (!types.contains(type) && Objects.nonNull(value))) {
-      throw new InvalidInputValueException(InvalidInputValueExceptionCode.INVALID_INPUT_VALUE);
-    }
+        logData.setEntityList.addAll(setList);
+        logData.update(routineData);
+        return routineEntity;
+      })
+      .toList();
   }
 
 }

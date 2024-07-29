@@ -1,6 +1,6 @@
 package com.example.healthcare.application.exercise.service.data;
 
-import com.example.healthcare.application.exercise.controller.dto.CreateUserExerciseSetDTO;
+import com.example.healthcare.application.exercise.controller.dto.ExerciseSetDTO;
 import com.example.healthcare.application.exercise.domain.UserExerciseSet;
 import com.example.healthcare.application.exercise.domain.code.WeightUnitType;
 import com.example.healthcare.util.CalculatorUtil;
@@ -34,21 +34,21 @@ public class UserExerciseData {
     public BigInteger sumReps = null;
     public BigInteger sumTime = null;
 
-    public void update(CreateUserExerciseSetDTO setDTO, WeightUnitType weightUnitType) {
+    public void update(ExerciseSetDTO setDTO, WeightUnitType weightUnitType) {
       setCount++;
 
-      Long weight = setDTO.weight();
+      Long weight = setDTO.getWeight();
       if (WeightUnitType.POUND.equals(weightUnitType)) {
-        weight = (long) Math.round(WeightUnitType.lbsToKg(setDTO.weight()));
+        weight = (long) Math.round(WeightUnitType.lbsToKg(setDTO.getWeight()));
       }
 
-      if (setDTO.reps() != null) {
-        weight *= setDTO.reps();
+      if (setDTO.getReps() != null) {
+        weight *= setDTO.getReps();
       }
 
       sumWeight = CalculatorUtil.add(sumWeight, weight);
-      sumReps = CalculatorUtil.add(sumReps, setDTO.reps());
-      sumTime = CalculatorUtil.add(sumTime, setDTO.time());
+      sumReps = CalculatorUtil.add(sumReps, setDTO.getReps());
+      sumTime = CalculatorUtil.add(sumTime, setDTO.getTime());
     }
   }
 

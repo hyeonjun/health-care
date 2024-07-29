@@ -162,3 +162,6 @@ alter table user_exercise_set
 -- 2024.07.28
 alter table user_exercise_routine
     add column is_deleted bit not null;
+
+drop index UKr62lumhns2g80n4miymds7bhq
+    on user_exercise_log;

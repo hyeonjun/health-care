@@ -2,6 +2,7 @@ package com.example.healthcare.application.exercise.repository;
 
 import com.example.healthcare.application.account.domain.User;
 import com.example.healthcare.application.exercise.domain.UserExerciseLog;
+import com.example.healthcare.application.exercise.repository.param.SearchUserExerciseLogParam;
 import com.example.healthcare.application.vo.QUserExerciseLogSummaryVO;
 import com.example.healthcare.application.vo.QUserExerciseLogVO;
 import com.example.healthcare.application.vo.QUserExerciseRoutineVO;
@@ -11,9 +12,13 @@ import com.example.healthcare.application.vo.UserExerciseLogVO;
 import com.example.healthcare.application.vo.UserExerciseRoutineVO;
 import com.example.healthcare.application.vo.UserExerciseSetVO;
 import com.example.healthcare.util.repository.CustomQuerydslRepositorySupport;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Objects;
 
 import static com.example.healthcare.application.exercise.domain.QExercise.exercise;
 import static com.example.healthcare.application.exercise.domain.QUserExerciseLog.userExerciseLog;
@@ -25,6 +30,15 @@ public class UserExerciseLogRepositoryImpl extends CustomQuerydslRepositorySuppo
 
   public UserExerciseLogRepositoryImpl() {
     super(UserExerciseLog.class);
+  }
+
+  @Override
+  public boolean existExerciseLog(User user, SearchUserExerciseLogParam param) {
+    return selectOne()
+      .from(userExerciseLog)
+      .where(getUserExerciseLogWhereCondition(param)
+        .and(userExerciseLog.user.eq(user)))
+      .fetchFirst() != null;
   }
 
   @Override
@@ -90,6 +104,24 @@ public class UserExerciseLogRepositoryImpl extends CustomQuerydslRepositorySuppo
       .orderBy(userExerciseSet.setNumber.asc());
 
     return applyPagination(pageable, query);
+  }
+
+  private BooleanBuilder getUserExerciseLogWhereCondition(SearchUserExerciseLogParam param) {
+    BooleanBuilder whereCondition = new BooleanBuilder();
+
+    if (Objects.nonNull(param.exerciseLogId())) {
+      whereCondition.and(userExerciseLog.id.eq(param.exerciseLogId()));
+    }
+
+    if (Objects.nonNull(param.exerciseDate())) {
+      whereCondition.and(userExerciseLog.exerciseDate.eq(param.exerciseDate()));
+    }
+
+    if(!CollectionUtils.isEmpty(param.exerciseTimeTypes())) {
+      whereCondition.and(userExerciseLog.exerciseTimeType.in(param.exerciseTimeTypes()));
+    }
+
+    return whereCondition;
   }
 
   private QUserExerciseRoutineVO getRoutineVO() {
