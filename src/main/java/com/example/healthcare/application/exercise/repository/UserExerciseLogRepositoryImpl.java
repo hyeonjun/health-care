@@ -110,7 +110,7 @@ public class UserExerciseLogRepositoryImpl extends CustomQuerydslRepositorySuppo
     BooleanBuilder whereCondition = new BooleanBuilder();
 
     if (Objects.nonNull(param.exerciseLogId())) {
-      whereCondition.and(userExerciseLog.id.eq(param.exerciseLogId()));
+      whereCondition.and(userExerciseLog.id.ne(param.exerciseLogId()));
     }
 
     if (Objects.nonNull(param.exerciseDate())) {

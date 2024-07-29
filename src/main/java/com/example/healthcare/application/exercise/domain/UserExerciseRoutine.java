@@ -61,7 +61,7 @@ public class UserExerciseRoutine extends Base {
   private BigInteger sumReps;
   private BigInteger sumTime;
 
-
+  @Builder.Default
   @Enumerated(value = EnumType.STRING)
   @Column(name = "weight_unit_type", length = 191)
   private WeightUnitType weightUnitType = WeightUnitType.KILOGRAM;

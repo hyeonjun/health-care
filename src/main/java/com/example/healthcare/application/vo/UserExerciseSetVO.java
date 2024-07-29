@@ -11,14 +11,14 @@ public record UserExerciseSetVO(
   Long setId,
   Long setNumber,
   ExerciseSetType exerciseSetType,
-  Long weight,
+  Double weight,
   Integer reps,
   Long time,
   boolean complete
 ) {
 
   @QueryProjection
-  public UserExerciseSetVO(Long routineId, Long setId, Long setNumber, ExerciseSetType exerciseSetType, Long weight, Integer reps, Long time, boolean complete) {
+  public UserExerciseSetVO(Long routineId, Long setId, Long setNumber, ExerciseSetType exerciseSetType, Double weight, Integer reps, Long time, boolean complete) {
     this.routineId = routineId;
     this.setId = setId;
     this.setNumber = setNumber;

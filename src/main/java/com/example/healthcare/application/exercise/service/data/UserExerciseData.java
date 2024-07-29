@@ -37,16 +37,16 @@ public class UserExerciseData {
     public void update(ExerciseSetDTO setDTO, WeightUnitType weightUnitType) {
       setCount++;
 
-      Long weight = setDTO.getWeight();
+      double weight = setDTO.getWeight();
       if (WeightUnitType.POUND.equals(weightUnitType)) {
-        weight = (long) Math.round(WeightUnitType.lbsToKg(setDTO.getWeight()));
+        weight = WeightUnitType.lbsToKg(setDTO.getWeight());
       }
 
       if (setDTO.getReps() != null) {
         weight *= setDTO.getReps();
       }
 
-      sumWeight = CalculatorUtil.add(sumWeight, weight);
+      sumWeight = CalculatorUtil.add(sumWeight, Math.round(weight));
       sumReps = CalculatorUtil.add(sumReps, setDTO.getReps());
       sumTime = CalculatorUtil.add(sumTime, setDTO.getTime());
     }

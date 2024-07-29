@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 public record CreateUserExerciseSetDTO(
   @NotNull @Min(1) Long setNumber,
   @NotNull ExerciseSetType exerciseSetType,
-  Long weight,
+  Double weight,
   Integer reps,
   Long time,
   @NotNull Boolean complete
@@ -32,7 +32,7 @@ public record CreateUserExerciseSetDTO(
   }
 
   @Override
-  public Long getWeight() {
+  public Double getWeight() {
     return weight();
   }
 

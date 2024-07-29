@@ -165,3 +165,5 @@ alter table user_exercise_routine
 
 drop index UKr62lumhns2g80n4miymds7bhq
     on user_exercise_log;
+
+alter table user_exercise_set modify weight double;

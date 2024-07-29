@@ -6,7 +6,7 @@ public interface ExerciseSetDTO {
 
   Long getSetNumber();
   ExerciseSetType getSetType();
-  Long getWeight();
+  Double getWeight();
   Integer getReps();
   Long getTime();
   Boolean getComplete();

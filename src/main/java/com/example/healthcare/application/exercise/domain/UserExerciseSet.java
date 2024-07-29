@@ -44,7 +44,7 @@ public class UserExerciseSet extends Base {
   @Column(name = "exercise_set_type", length = 191)
   private ExerciseSetType exerciseSetType;
 
-  private Long weight;
+  private double weight;
   private Integer reps;
   private Long time;
 
